@@ -1,0 +1,16 @@
+ID,"PA, bregma","IS, bregma","PA, lambda","IS, lambda",tissue,label
+bregma,0,0,3.9,0,skull,
+lambda,-3.9,0,0,0,skull,
+1,-6.9,-0.58,,,skull,
+2,-7.11,-0.65,,,skull,
+3,-7.33,-1.1,,,skull,
+4,-7.33,-0.76,,,skull,
+5,-7.75,-1.35,,,skull,
+6,-7.9,-1.68,,,skull,
+7,,,-3,-0.76,skull,
+8,,,-3.21,-0.86,skull,
+9,,,-3.41,-0.95,skull,
+10,,,-3.85,-1.7,skull,
+11,,,-4,-1.95,skull,
+12,-3.5,-4.25,,,brain,VTA
+13,,,-0.6,-3.3,brain,DR
