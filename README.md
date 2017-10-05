@@ -1,8 +1,8 @@
 # StereotaXYZ
 [![Build Status](https://travis-ci.org/IBT-FMI/StereotaXYZ.svg?branch=master)](https://travis-ci.org/IBT-FMI/StereotaXYZ)
 
-StereotaXYZ - pronounced "stereo-tack-seas" - aids in the empirical design or custom per-animal targeting of stereotactic procedures.
-This is particularly relevant for performing interventions through high skull shape variability areas (e.g. the occipital or nasal bone plates) or areas which are difficult to access e.g. due to the proximity of tough or vital tissue.
+StereotaXYZ - pronounced "stereo-tack-seas" - aids in the empirical design and in the custom per-animal customization of stereotactically targeted procedures.
+This is particularly relevant when performing interventions at odd angles through high skull shape variability areas (e.g. the occipital or nasal bone plates) or areas which are difficult to access e.g. due to the proximity of tough or vital tissue.
 
 ## Installation
 
