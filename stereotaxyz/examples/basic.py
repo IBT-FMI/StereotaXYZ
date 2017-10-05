@@ -1,12 +1,14 @@
 from stereotaxyz.skullsweep import *
 
-df = load_data('~/data/stereotactic/skull_6465.csv', origin='bregma')
+data_dir = path.join(path.dirname(path.realpath(__file__)),"../../example_data")
+data_file = path.join(data_dir,'skull_6465.csv')
+df = load_data(data_file, origin='bregma')
 ax = draw_anatomy(df)
 
-implant(30,'VTA',df,ax,'#56B4E9','best')
-implant(45,'VTA',df,ax,'#56B4E9','best')
-implant(30,'DR',df,ax,'#E69F00','best')
-implant(45,'DR',df,ax,'#E69F00','best')
+implant(35,'VTA',df,ax,'#56B4ED','best')
+implant(45,'VTA',df,ax,'#5FCAE2','best')
+implant(30,'DR',df,ax,'#EA9F00','best')
+implant(40,'DR',df,ax,'#E0B910','best')
 
 plt.savefig('basic.png')
 
