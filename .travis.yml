@@ -1,0 +1,12 @@
+language: python
+python:
+  - "2.7"
+  - "3.5"
+#clone demolog for example DB generation code
+install:
+  - travis_wait 20 pip install -r requirements.txt
+  - pip install .
+script: 
+  - export MPLBACKEND="agg"
+  - py.test
+  - (cd labbookdb/examples && for f in *.py ; do python "$f" ; done)
