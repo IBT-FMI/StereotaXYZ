@@ -13,10 +13,9 @@ setup(
 	provides = ["stereotaxyz"],
 	packages = [
 		"stereotaxyz",
-		"stereotaxyz.skullsweep",
 		],
 	include_package_data=True,
 	entry_points = {'console_scripts' : \
-			['SAMRI = stereotaxyz.cli:main']
+			['stereotaxyz = stereotaxyz.cli:main']
 		}
 	)
