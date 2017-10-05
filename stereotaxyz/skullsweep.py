@@ -104,12 +104,11 @@ def load_data(df,
 	return df
 
 
-df = load_data('~/data/stereotactic/skull_6465.csv', origin='bregma')
-ax = draw_anatomy(df)
-#implant(30,'VTA',df,ax,'b','best')
-#implant(45,'VTA',df,ax,'c','best')
-#implant(30,'DR',df,ax,'red','best')
-implant(45,'DR',df,ax,'orange','best')
-
-plt.show()
+def design(data_file, target, angle,
+	origin='bregma',
+	):
+	df = load_data('~/data/stereotactic/skull_6465.csv', origin=origin)
+	ax = draw_anatomy()
+	implant(angle,target,df,ax,'orange','best')
+	plt.show()
 
