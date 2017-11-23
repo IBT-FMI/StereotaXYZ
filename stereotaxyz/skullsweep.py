@@ -73,7 +73,7 @@ def draw_anatomy(df,):
 	return ax
 
 def load_data(df,
-	origin='bregma',
+	ultimate_reference='bregma',
 	):
 	"""Load and process stereotactic and/or atlas data.
 
@@ -81,6 +81,7 @@ def load_data(df,
 	----------
 	origin : {"lambda", "bregma", interaural}
 		Whether to make all coordinates relative to bregma, lambda, or the interaural midpoint.
+		What value you can use is contingent on the data you input.
 
 	Notes
 	-----
@@ -90,18 +91,28 @@ def load_data(df,
 	if isinstance(df, str):
 		df = path.abspath(path.expanduser(df))
 		df = pd.read_csv(df)
-	if origin == 'bregma':
-		df['PA, bregma'].fillna(df['PA, lambda']+df[df['ID']=='lambda']['PA, bregma'].values[0], inplace=True)
-		df['IS, bregma'].fillna(df['IS, lambda']+df[df['ID']=='lambda']['IS, bregma'].values[0], inplace=True)
-		df['PA'] = df['PA, bregma']
-		df['IS'] = df['IS, bregma']
-	elif origin == 'lambda':
-		df['PA, lambda'].fillna(df['PA, bregma']+df[df['ID']=='bregma']['PA, lambda'].values[0], inplace=True)
-		df['IS, lambda'].fillna(df['IS, bregma']+df[df['ID']=='bregma']['IS, lambda'].values[0], inplace=True)
-		df['PA'] = df['PA, lambda']
-		df['IS'] = df['IS, lambda']
+	df_referenced = pd.DataFrame([])
+	for index, row in df.iterrows():
+		df_add = deepcopy(df.ix[index])
+		reference = row['reference']
+		superoinferior_measured = row['superoinferior']
+		superoinferior_correction = 0
+		posteroanterior_measured = row['posteroanterior']
+		posteroanterior_correction = 0
+		while reference != ultimate_reference:
+			superoinferior_correction_step = df[df['ID']==reference]['superoinferior'].item()
+			superoinferior_correction += superoinferior_correction_step
+			posteroanterior_correction_step = df[df['ID']==reference]['posteroanterior'].item()
+			posteroanterior_correction += posteroanterior_correction_step
+			reference = df[df['ID']==reference]['reference'].item()
+		df_add['reference'] = reference
+		df_add['superoinferior'] = superoinferior_measured + superoinferior_correction
+		df_add['posteroanterior'] = posteroanterior_measured + posteroanterior_correction
+		df_referenced = df_referenced.append(df_add)
 
-	return df
+	df_referenced['inferosuperior'] = -df_referenced['superoinferior']
+
+	return df_referenced
 
 
 def design(data_file, target, angle,

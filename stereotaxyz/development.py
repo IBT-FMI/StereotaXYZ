@@ -6,7 +6,7 @@ from os import path
 
 data_dir = path.join(path.dirname(path.realpath(__file__)),"../example_data")
 data_file = path.join(data_dir,'skull_6465.csv')
-df = skullsweep.load_data(data_file, origin='bregma')
+df = skullsweep.load_data(data_file)
 
 df_slice = df[df['tissue']=='skull']
 img = make_nii(df_slice, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
