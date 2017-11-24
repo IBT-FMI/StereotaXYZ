@@ -15,24 +15,24 @@ def make_nii(df_slice,
 	data = np.zeros(shape=template.shape)
 	for ix, point in df_slice.iterrows():
 		try:
-			x = point['PA, bregma']
+			x = point['posteroanterior']
 		except KeyError:
 			try:
-				x = -point['AP, bregma']
+				x = -point['anteroposterior']
 			except KeyError:
 				x = 0
 		try:
-			y = point['LR, bregma']
+			y = point['leftright']
 		except KeyError:
 			try:
-				y = -point['RL, bregma']
+				y = -point['rightleft']
 			except KeyError:
 				y = 0
 		try:
-			z = point['IS, bregma']
+			z = point['inferosuperior']
 		except KeyError:
 			try:
-				z = -point['SI, bregma']
+				z = -point['superoinferior']
 			except KeyError:
 				z = 0
 		new_y = (-y-affine[0,3])/affine[0,0]

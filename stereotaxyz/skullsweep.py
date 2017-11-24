@@ -9,7 +9,8 @@ from copy import deepcopy
 def implant(angle, target, df,
 	ax = False,
 	color = 'c',
-	plot_projections='all',
+	plot_projections='best',
+	display=False,
 	):
 	"""Calculate and print injection or implant entry pint and length rewuired to each a specified target at a specified angle.
 
@@ -20,40 +21,49 @@ def implant(angle, target, df,
 		The desired angle of the implant or injection in degrees. Note that the angle value is defined as 0 if the implant heads in posterior to anterior, and 180 if it heads in anterior to posterior.
 	"""
 
+	if not ax and display:
+		plt.figure()
+		plt.axis('equal')
+		ax = plt.axes()
+
 	real_angle = 180-angle
 	df_ = deepcopy(df)
 	resolution = 1000
-	x_min = df['PA'].min()-1
-	x_max = df['PA'].max()+1
+	x_min = df['posteroanterior'].min()-1
+	x_max = df['posteroanterior'].max()+1
 	x = np.linspace(x_min,x_max,resolution)
 	rad_angle = np.radians(real_angle)
 	slope = np.tan(rad_angle)
 	if isinstance(target, dict):
-		x_offset = target['PA']
-		y_offset = target['IS']
+		x_offset = target['posteroanterior']
+		y_offset = target['inferosuperior']
 	else:
-		x_offset = df_[df_['label']==target]['PA'].values[0]
-		y_offset = df_[df_['label']==target]['IS'].values[0]
+		x_offset = df_[df_['ID']==target]['posteroanterior'].values[0]
+		y_offset = df_[df_['ID']==target]['inferosuperior'].values[0]
 	intercept = -x_offset*slope + y_offset
 	y = x*slope + intercept
-	df_['IS '+str(angle)]=df_['PA']*slope + intercept
+	df_['IS '+str(angle)]=df_['posteroanterior']*slope + intercept
 	if plot_projections == 'all':
-		ax.scatter(df_[df_['tissue']=='skull']['PA'], df_[df_['tissue']=='skull']['IS '+str(angle)], color=color)
+		if display:
+			ax.scatter(df_[df_['tissue']=='skull']['posteroanterior'], df_[df_['tissue']=='skull']['IS '+str(angle)], color=color)
 	elif plot_projections == 'best':
-		df_['projection distance'] = df_['IS '+str(angle)]-df_['IS']
+		df_['projection distance'] = df_['IS '+str(angle)]-df_['inferosuperior']
 		closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
-		pa_in = df_[df_['projection distance'].abs()==closest]['PA'].values[0]
+		pa_in = df_[df_['projection distance'].abs()==closest]['posteroanterior'].values[0]
 		is_in = df_[df_['projection distance'].abs()==closest]['IS '+str(angle)].values[0]
 		point_projection_hypothenuse = df_.loc[df_['projection distance'].abs()==closest, 'projection distance'].item()*np.sin(rad_angle)
 		is_in -= np.sin(rad_angle)*point_projection_hypothenuse
 		pa_in -= np.cos(rad_angle)*point_projection_hypothenuse
 		implant_length = ((is_in-y_offset)**2+(pa_in-x_offset)**2)**(1/2.)
-		ax.scatter(pa_in, is_in, color=color)
+		if display:
+			ax.scatter(pa_in, is_in, color=color)
 		print('For {}°:'.format(angle))
 		print('Posteroanterior: {0:.2f}'.format(pa_in))
 		print('Inferosuperior: {0:.2f}'.format(is_in))
 		print('Implant Length: {0:.2f}'.format(implant_length))
-	ax.plot(x,y,color=color)
+	if display:
+		ax.plot(x,y,color=color)
+	return slope, intercept, pa_in, is_in
 
 def draw_anatomy(df,):
 	"""Draw skull and brain ROI locations listed in a `pandas.DataFrame` object.
@@ -68,8 +78,8 @@ def draw_anatomy(df,):
 	plt.axis('equal')
 	ax = plt.axes()
 
-	ax.scatter(df['PA'], df['IS'], color='0.5')
-	ax.scatter(df[df['tissue']=='brain']['PA'], df[df['tissue']=='brain']['IS'], color='y')
+	ax.scatter(df['posteroanterior'], df['inferosuperior'], color='0.5')
+	ax.scatter(df[df['tissue']=='brain']['posteroanterior'], df[df['tissue']=='brain']['inferosuperior'], color='y')
 	return ax
 
 def load_data(df,
@@ -116,9 +126,8 @@ def load_data(df,
 
 
 def design(data_file, target, angle,
-	origin='bregma',
 	):
-	df = load_data('~/data/stereotactic/skull_6465.csv', origin=origin)
+	df = load_data('~/data/stereotactic/skull_6465.csv')
 	ax = draw_anatomy()
 	implant(angle,target,df,ax,'orange','best')
 	plt.show()
