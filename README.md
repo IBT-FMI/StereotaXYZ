@@ -6,6 +6,13 @@ This is particularly relevant when performing interventions at odd angles throug
 
 In addition to implant design functionality, StereotaXYZ ships with a plotting utility, which allows visual inspection of implant designs with.
 
+## Examples
+
+### Animal Imaging Center “Picture of the Month” (2017-12)
+Annotated and stylized `stereotaxyz.plotting.co_plot()` output. This exemplifies the StereotaXYZ concept, whereby the best site of entry and recommended insertable length is calculated (given a target, skull coordinates and desired angle of entry) and presented in a detailed anatomical overview.
+
+![Co-Plot](http://www.chymera.eu/img/examples/stereotaxyz/concept.png "Co-Plot")
+
 ## Installation
 
 ### Python Package Manager (Users)
