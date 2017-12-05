@@ -42,15 +42,15 @@ def implant(angle, target, df,
 		y_offset = df_[df_['ID']==target]['inferosuperior'].values[0]
 	intercept = -x_offset*slope + y_offset
 	y = x*slope + intercept
-	df_['IS '+str(angle)]=df_['posteroanterior']*slope + intercept
+	df_['inferosuperior '+str(angle)]=df_['posteroanterior']*slope + intercept
 	if plot_projections == 'all':
 		if display:
-			ax.scatter(df_[df_['tissue']=='skull']['posteroanterior'], df_[df_['tissue']=='skull']['IS '+str(angle)], color=color)
+			ax.scatter(df_[df_['tissue']=='skull']['posteroanterior'], df_[df_['tissue']=='skull']['inferosuperior '+str(angle)], color=color)
 	elif plot_projections == 'best':
-		df_['projection distance'] = df_['IS '+str(angle)]-df_['inferosuperior']
+		df_['projection distance'] = df_['inferosuperior '+str(angle)]-df_['inferosuperior']
 		closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
 		pa_in = df_[df_['projection distance'].abs()==closest]['posteroanterior'].values[0]
-		is_in = df_[df_['projection distance'].abs()==closest]['IS '+str(angle)].values[0]
+		is_in = df_[df_['projection distance'].abs()==closest]['inferosuperior '+str(angle)].values[0]
 		print(closest)
 		print(df_)
 		print(df_.loc[df_['projection distance'].abs()==closest, 'projection distance'])
@@ -74,7 +74,7 @@ def draw_anatomy(df,):
 	----------
 
 	df : pandas.DataFrame
-		A `pandas.DataFrame` object which contains columns named "tissue", "PA", and "IS".
+		A `pandas.DataFrame` object which contains columns named "tissue", "posteroanterior", and "inferosuperior".
 	"""
 	plt.figure()
 	plt.axis('equal')
