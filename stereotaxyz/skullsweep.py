@@ -51,9 +51,11 @@ def implant(angle, target, df,
 		closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
 		pa_in = df_[df_['projection distance'].abs()==closest]['posteroanterior'].values[0]
 		is_in = df_[df_['projection distance'].abs()==closest]['IS '+str(angle)].values[0]
-		point_projection_hypothenuse = df_.loc[df_['projection distance'].abs()==closest, 'projection distance'].item()*np.sin(rad_angle)
-		is_in -= np.sin(rad_angle)*point_projection_hypothenuse
-		pa_in -= np.cos(rad_angle)*point_projection_hypothenuse
+		print(closest)
+		print(df_)
+		print(df_.loc[df_['projection distance'].abs()==closest, 'projection distance'])
+		is_in -= np.sin(rad_angle)*closest
+		pa_in -= np.cos(rad_angle)*closest
 		implant_length = ((is_in-y_offset)**2+(pa_in-x_offset)**2)**(1/2.)
 		if display:
 			ax.scatter(pa_in, is_in, color=color)
