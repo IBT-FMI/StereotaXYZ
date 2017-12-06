@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 from os import path
 from copy import deepcopy
 
-def implant(angle, target, df,
+def _implant_by_angle(angle, target, df,
 	ax = False,
 	color = 'c',
 	plot_projections='best',
 	display=False,
 	):
-	"""Calculate and print injection or implant entry pint and length rewuired to each a specified target at a specified angle.
+	"""Calculate and print injection or implant entry pint and length required to each a specified target at a specified angle.
 
 	Parameters
 	----------
@@ -51,9 +51,6 @@ def implant(angle, target, df,
 		closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
 		pa_in = df_[df_['projection distance'].abs()==closest]['posteroanterior'].values[0]
 		is_in = df_[df_['projection distance'].abs()==closest]['inferosuperior '+str(angle)].values[0]
-		print(closest)
-		print(df_)
-		print(df_.loc[df_['projection distance'].abs()==closest, 'projection distance'])
 		is_in -= np.sin(rad_angle)*closest
 		pa_in -= np.cos(rad_angle)*closest
 		implant_length = ((is_in-y_offset)**2+(pa_in-x_offset)**2)**(1/2.)
@@ -65,6 +62,53 @@ def implant(angle, target, df,
 		print('Implant Length: {0:.2f}'.format(implant_length))
 	if display:
 		ax.plot(x,y,color=color)
+	return slope, intercept, pa_in, is_in
+
+def implant_by_angle(target, df,
+	stereotaxis_style_angle=True,
+	resolution=1000,
+	xz_angle=0.,
+	yz_angle=0.,
+	):
+	"""Calculate and print injection or implant entry pint and length required to each a specified target at a specified angle.
+
+	Parameters
+	----------
+
+	angle: int
+		The desired angle of the implant or injection in degrees. Note that the angle value is defined as 0 if the implant heads in posterior to anterior, and 180 if it heads in anterior to posterior.
+	"""
+
+	if stereotaxys_style_angle:
+		xz_angle = 90 + zx_angle
+		yz_angle = 90 + zx_angle
+	df_ = deepcopy(df)
+	xz_angle = np.radians(yz_angle)
+	yz_angle = np.radians(yz_angle)
+	composite_angle = np.arctan((np.tan(xz_angle)**2+np.tan(yz_angle)**2)**(1/2))
+	slope = np.tan(rad_angle)
+	if isinstance(target, dict):
+		x_offset = target['leftright']
+		y_offset = target['posteroanterior']
+		z_offset = target['inferosuperior']
+	else:
+		x_offset = df_[df_['ID']==target]['leftright'].values[0]
+		y_offset = df_[df_['ID']==target]['posteroanterior'].values[0]
+		z_offset = df_[df_['ID']==target]['inferosuperior'].values[0]
+	increment = [
+		np.tan(xz_angle)*np.cos(composite_angle),
+		np.tan(yz_angle)*np.cos(composite_angle),
+		np.cos(composite_angle),
+		]
+	df_['leftright (implant projection)']=(df_['leftright']-z_offset)*increment[0]
+	df_['posteroanterior (implant projection)']=df_['posteroanterior']-z_offset*increment[1]
+	df_['inferosuperior (implant projection)']=df_['inferosuperior']-z_offset*increment[2]
+	closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
+	pa_in = df_[df_['projection distance'].abs()==closest]['posteroanterior'].values[0]
+	is_in = df_[df_['projection distance'].abs()==closest]['inferosuperior '+str(angle)].values[0]
+	is_in -= np.sin(rad_angle)*closest
+	pa_in -= np.cos(rad_angle)*closest
+	implant_length = ((is_in-z_offset)**2+(pa_in-y_offset)**2)**(1/2.)
 	return slope, intercept, pa_in, is_in
 
 def draw_anatomy(df,):
