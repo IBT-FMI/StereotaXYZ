@@ -4,16 +4,80 @@ import nibabel as nib
 import numpy as np
 import nibabel as nib
 import numpy as np
+from copy import deepcopy
 from nilearn.plotting import plot_stat_map, plot_roi, plot_anat
 from os import path
 from stereotaxyz import skullsweep
 
+def plot_yz(df, target, entry, angle,
+	resolution=1000,
+	stereotaxis_style_angle=True,
+	color_skull='gray',
+	color_target='orange',
+	color_implant='c',
+	color_entry='r',
+	color_projection='',
+	):
+	"""Create a 2D plot (along the YZ plane) containing structures of interest recorded in a StereotaXYZ-style (e.g. `stereotaxyz.skullsweep`-outputted) DataFrame.
+
+	Parameters
+	----------
+
+	df : pandas.DataFrame
+		A Pandas DataFrame object containing columns named 'posteroanterior', 'inferosuperior', and 'ID'.
+	target : str or dict or list
+		Either a string giving the 'ID' column in the `df` input which denotes the target structure row; or a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
+	entry : dict or list
+		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
+	"""
+
+	plt.figure()
+	plt.axis('equal')
+	ax = plt.axes()
+
+	x_min = df['posteroanterior'].min()-1
+	x_max = df['posteroanterior'].max()+1
+
+	if stereotaxis_style_angle:
+		angle += 90
+	angle = np.radians(angle)
+        slope = np.tan(angle)
+
+	x = np.linspace(x_min,x_max,resolution)
+	if isinstance(target, dict):
+                x_offset = target['posteroanterior']
+                y_offset = target['inferosuperior']
+        try:
+                x_offset = df[df['ID']==target]['posteroanterior'].values[0]
+                y_offset = df[df['ID']==target]['inferosuperior'].values[0]
+	except KeyError:
+		x_offset, y_offset = target
+	intercept = -x_offset*slope + y_offset
+
+	y = x*slope + intercept
+
+	if color_skull:
+		ax.scatter(df[df['tissue']=='skull']['posteroanterior'], df[df['tissue']=='skull']['inferosuperior'], color=color_skull)
+	if color_implant:
+		ax.plot(x,y,color=color_implant)
+	if color_target:
+		ax.scatter(x_offset, y_offset, color=color_target)
+	if color_projection:
+		ax.scatter(df[df['tissue']=='skull']['posteroanterior (implant projection)'], df[df['tissue']=='skull']['inferosuperior (implant projection)'], color=color_projection)
+	if color_entry:
+		try:
+			ax.scatter(entry['posteroanterior'], entry['inferosuperior'], color=color_entry, marker='v')
+		except TypeError:
+			ax.scatter(entry[0], entry[1], color=color_entry, marker='v')
+
 def co_plot(target, skullsweep_data,
-	angle=0,
+	yz_angle=0,
+	xz_angle=0,
 	angle_axis='x',
 	custom_style=False,
 	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
 	text_output=False,
+	projection_color='',
 	save_as='',
 	):
 	"""Co-plot of skullsweep data points together with target and best entry point coordinates (as computed based on the skullsweep data and the angle of entry).
@@ -64,23 +128,32 @@ def co_plot(target, skullsweep_data,
 		except KeyError:
 			target_y = 0
 		try:
-			target_z = -target_df['superoinferior'].item()
+			target_z = target_df['inferosuperior'].item()
 		except KeyError:
 			target_z = 0
 		target_coords = [(target_y, target_x, target_z)]
 	if text_output:
 		print(target_coords)
 
-	slope, intercept, pa_in, is_in = skullsweep.implant(angle, 'DR', animal_df,
-		ax = False,
-		color = 'c',
-		plot_projections='best',
+	t, posteroanterior, inferosuperior, leftright, df_ = skullsweep.implant_by_angle(target, animal_df,
+		yz_angle=yz_angle,
 		)
-	insertion_site = [(0, pa_in, is_in)]
+	insertion_site = [(leftright, posteroanterior, inferosuperior)]
+
+	if projection_color:
+		projection_df = deepcopy(df_)
+		projection_df['posteroanterior'] = projection_df['posteroanterior (implant projection)']
+		projection_df['inferosuperior'] = projection_df['inferosuperior (implant projection)']
+		projection_df['leftright'] = projection_df['leftright (implant projection)']
+		projection_img = make_nii(projection_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
+		projection_color = matplotlib.colors.ListedColormap([projection_color], name='projection_color')
 
 	# Start actual plotting:
 	if not custom_style:
-		plt.style.use('stereotaxyz.conf')
+		try:
+			plt.style.use('stereotaxyz.conf')
+		except IOError:
+			pass
 	plt.figure()
 	plt.axis('equal')
 	ax = plt.axes()
@@ -95,6 +168,8 @@ def co_plot(target, skullsweep_data,
 	display.add_overlay(skull_img, cmap=skull_color)
 	display.add_markers(target_coords, marker_color='#E5E520', marker_size=200)
 	display.add_markers(insertion_site, marker_color='#FFFFFF', marker_size=200)
+	if projection_color:
+		display.add_overlay(projection_img, cmap=projection_color)
 	if not save_as:
 		plt.show()
 

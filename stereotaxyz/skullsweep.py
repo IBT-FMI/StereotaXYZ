@@ -78,15 +78,13 @@ def implant_by_angle(target, df,
 	angle: int
 		The desired angle of the implant or injection in degrees. Note that the angle value is defined as 0 if the implant heads in posterior to anterior, and 180 if it heads in anterior to posterior.
 	"""
-
-	if stereotaxys_style_angle:
-		xz_angle = 90 + zx_angle
-		yz_angle = 90 + zx_angle
+	if stereotaxis_style_angle:
+		xz_angle = xz_angle
+		yz_angle = 90 + yz_angle
 	df_ = deepcopy(df)
-	xz_angle = np.radians(yz_angle)
+	xz_angle = np.radians(xz_angle)
 	yz_angle = np.radians(yz_angle)
 	composite_angle = np.arctan((np.tan(xz_angle)**2+np.tan(yz_angle)**2)**(1/2))
-	slope = np.tan(rad_angle)
 	if isinstance(target, dict):
 		x_offset = target['leftright']
 		y_offset = target['posteroanterior']
@@ -100,16 +98,17 @@ def implant_by_angle(target, df,
 		np.tan(yz_angle)*np.cos(composite_angle),
 		np.cos(composite_angle),
 		]
-	df_['leftright (implant projection)']=(df_['leftright']-z_offset)*increment[0]
-	df_['posteroanterior (implant projection)']=df_['posteroanterior']-z_offset*increment[1]
-	df_['inferosuperior (implant projection)']=df_['inferosuperior']-z_offset*increment[2]
+	df_['t'] = (df_['leftright']-x_offset)*increment[0] + (df_['posteroanterior']-y_offset)*increment[1] + (df_['inferosuperior']-z_offset)*increment[2]
+	df_['leftright (implant projection)'] = df_['t']*increment[0] + x_offset
+	df_['posteroanterior (implant projection)'] = df_['t']*increment[1] + y_offset
+	df_['inferosuperior (implant projection)'] = df_['t']*increment[2] + z_offset
+	df_['projection distance'] = ((df_['leftright']-x_offset)**2 + (df_['posteroanterior']-y_offset)**2 + (df_['inferosuperior']-z_offset)**2 - df_['t']**2)**(1./2)
 	closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
-	pa_in = df_[df_['projection distance'].abs()==closest]['posteroanterior'].values[0]
-	is_in = df_[df_['projection distance'].abs()==closest]['inferosuperior '+str(angle)].values[0]
-	is_in -= np.sin(rad_angle)*closest
-	pa_in -= np.cos(rad_angle)*closest
-	implant_length = ((is_in-z_offset)**2+(pa_in-y_offset)**2)**(1/2.)
-	return slope, intercept, pa_in, is_in
+	posteroanterior = df_[df_['projection distance'].abs()==closest]['posteroanterior (implant projection)'].values[0]
+	inferosuperior = df_[df_['projection distance'].abs()==closest]['inferosuperior (implant projection)'].values[0]
+	leftright = df_[df_['projection distance'].abs()==closest]['leftright (implant projection)'].values[0]
+	t = df_[df_['projection distance'].abs()==closest]['t'].values[0]
+	return t, posteroanterior, inferosuperior, leftright, df_
 
 def draw_anatomy(df,):
 	"""Draw skull and brain ROI locations listed in a `pandas.DataFrame` object.
@@ -167,6 +166,8 @@ def load_data(df,
 		df_referenced = df_referenced.append(df_add)
 
 	df_referenced['inferosuperior'] = -df_referenced['superoinferior']
+	if not 'leftright' in df_referenced.columns:
+		df_referenced['leftright'] = 0
 
 	return df_referenced
 

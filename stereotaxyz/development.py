@@ -9,7 +9,17 @@ data_dir = path.join(path.dirname(path.realpath(__file__)),"../example_data")
 data_file = path.join(data_dir,'skull_6465.csv')
 df = skullsweep.load_data(data_file)
 
-def basic():
+def basic2d():
+	t, posteroanterior, inferosuperior, leftright, df_ = skullsweep.implant_by_angle('VTA', df, yz_angle=45.)
+	plotting.plot_yz(df_, 'VTA', [posteroanterior, inferosuperior], 45., color_projection='c')
+	plt.show()
+
+def basic3d():
+	ax = skullsweep.draw_anatomy(df)
+	skullsweep.implant_by_angle('VTA',df,yz_angle=30.)
+	plt.show()
+
+def _basic():
 	ax = skullsweep.draw_anatomy(df)
 	skullsweep.implant(30,'VTA',df,ax,'orange','best')
 	plt.show()
@@ -34,4 +44,4 @@ def old():
 	plt.show()
 
 def demo():
-	plotting.co_plot('DR',data_file, angle=30,)
+	plotting.co_plot('VTA', data_file, yz_angle=45., projection_color='c')
