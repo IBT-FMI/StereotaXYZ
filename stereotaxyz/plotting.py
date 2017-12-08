@@ -5,9 +5,12 @@ import numpy as np
 import nibabel as nib
 import numpy as np
 from copy import deepcopy
+from matplotlib import rcParams
 from nilearn.plotting import plot_stat_map, plot_roi, plot_anat
 from os import path
 from stereotaxyz import skullsweep
+
+THIS_PATH = path.dirname(path.realpath(__file__))
 
 def plot_yz(df,
 	target="",
@@ -20,6 +23,8 @@ def plot_yz(df,
 	color_implant='c',
 	color_entry='r',
 	color_projection='',
+	custom_style=False,
+	implant_axis=True,
 	):
 	"""Create a 2D plot (along the YZ plane) containing structures of interest recorded in a StereotaXYZ-style (e.g. `stereotaxyz.skullsweep`-outputted) DataFrame.
 
@@ -55,7 +60,13 @@ def plot_yz(df,
 		Color with which the skull projection points on the implant axis are to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
 		This is mainly a debugging feature.
+	implant_axis : bool, optional
+		Whether to plot the implant axis.
 	"""
+
+	# Start actual plotting:
+	if not custom_style:
+		plt.style.use(path.join(THIS_PATH,'stereotaxyz.conf'))
 
 	plt.figure()
 	plt.axis('equal')
@@ -82,21 +93,45 @@ def plot_yz(df,
 		x = np.linspace(x_min,x_max,resolution)
 		y = x*slope + intercept
 
-	if color_skull:
-		ax.scatter(df[df['tissue']=='skull']['posteroanterior'], df[df['tissue']=='skull']['inferosuperior'], color=color_skull)
-	if target:
-		if color_implant:
-			ax.plot(x,y,color=color_implant)
-		if color_target:
-			ax.scatter(x_offset, y_offset, color=color_target)
-		if color_projection:
-			ax.scatter(df[df['tissue']=='skull']['posteroanterior (implant projection)'], df[df['tissue']=='skull']['inferosuperior (implant projection)'], color=color_projection)
-	if color_entry:
+	if entry:
 		try:
-			ax.scatter(entry['posteroanterior'], entry['inferosuperior'], color=color_entry, marker='v')
+			x_entry = entry['posteroanterior']
+			y_entry = entry['inferosuperior']
 		except TypeError:
-			if len(entry) >= 2:
-				ax.scatter(entry[0], entry[1], color=color_entry, marker='v')
+			x_entry, y_entry = entry
+
+	legend_handles = []
+	legend_names = []
+	if color_skull:
+		skull_plot = ax.scatter(df[df['tissue']=='skull']['posteroanterior'], df[df['tissue']=='skull']['inferosuperior'], color=color_skull)
+		legend_handles.append(skull_plot)
+		legend_names.append("Skull")
+	if target:
+		if color_implant and implant_axis:
+			implant_axis_plot, = ax.plot(x, y, color=color_implant, linewidth=rcParams['lines.linewidth']*0.5, label='Implant Axis')
+		if color_target:
+			target_plot = ax.scatter(x_offset, y_offset, color=color_target)
+			legend_handles.append(target_plot)
+			legend_names.append("Target")
+		if color_projection:
+			skull_projection_plot = ax.scatter(df[df['tissue']=='skull']['posteroanterior (implant projection)'], df[df['tissue']=='skull']['inferosuperior (implant projection)'], color=color_projection)
+			legend_handles.append(skull_projection_plot)
+			legend_names.append("Skull Projection")
+	if entry and color_entry:
+		entry_plot = ax.scatter(x_entry, y_entry, color=color_entry, marker='D')
+		legend_handles.append(entry_plot)
+		legend_names.append("Entry Point")
+	if entry and target and color_implant:
+		implant_plot, = ax.plot([x_entry, x_offset],[y_entry,y_offset],  color=color_implant, linewidth=rcParams['lines.linewidth']*2.)
+		legend_handles.append(implant_plot)
+		legend_names.append("Implant")
+	# These (less important) items should be at the end of the legend, though they should also be plotted underneath (i.e. before) all others.
+	try:
+		legend_handles.append(implant_axis_plot)
+		legend_names.append("Implant Axis")
+	except NameError:
+		pass
+	legend = ax.legend(legend_handles, legend_names)
 
 def co_plot(target, skullsweep_data,
 	yz_angle=0,
