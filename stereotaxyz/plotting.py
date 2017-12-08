@@ -2,8 +2,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
-import nibabel as nib
-import numpy as np
 from copy import deepcopy
 from matplotlib import rcParams
 from nilearn.plotting import plot_stat_map, plot_roi, plot_anat
