@@ -14,16 +14,6 @@ def basic2d():
 	plotting.plot_yz(df_, 'VTA', [posteroanterior, inferosuperior], 45., color_projection='c')
 	plt.show()
 
-def basic3d():
-	ax = skullsweep.draw_anatomy(df)
-	skullsweep.implant_by_angle('VTA',df,yz_angle=30.)
-	plt.show()
-
-def _basic():
-	ax = skullsweep.draw_anatomy(df)
-	skullsweep.implant(30,'VTA',df,ax,'orange','best')
-	plt.show()
-
 def old():
 	plt.style.use('stereotaxyz.conf')
 	plt.figure()

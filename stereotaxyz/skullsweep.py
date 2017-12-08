@@ -108,7 +108,7 @@ def implant_by_angle(target, df,
 	inferosuperior = df_[df_['projection distance'].abs()==closest]['inferosuperior (implant projection)'].values[0]
 	leftright = df_[df_['projection distance'].abs()==closest]['leftright (implant projection)'].values[0]
 	t = df_[df_['projection distance'].abs()==closest]['t'].values[0]
-	return t, posteroanterior, inferosuperior, leftright, df_
+	return t, leftright, posteroanterior, inferosuperior, df_
 
 def draw_anatomy(df,):
 	"""Draw skull and brain ROI locations listed in a `pandas.DataFrame` object.
