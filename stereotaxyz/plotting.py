@@ -4,7 +4,6 @@ import nibabel as nib
 import numpy as np
 from copy import deepcopy
 from matplotlib import rcParams
-from nilearn.plotting import plot_stat_map, plot_roi, plot_anat
 from os import path
 from stereotaxyz import skullsweep
 
@@ -164,8 +163,17 @@ def co_plot(target, skullsweep_data,
 		Whether to print relevant output (computed enrty point coordinates and recommended implant length) to the command line.
 	save_as : str
 		Path under which to save the output image.
+
+	Notes
+	-----
+	Some functions are imported in local scope to allow 2D plotting to function with minimal dependencies.
 	"""
 
+	try:
+		from nilearn.plotting import plot_anat
+	except ImportError:
+		print('You seem to be lacking “nilearn”, a module which we require for 3D plotting on top of a reference image - or one of its dependencies. Please make this package and its full dependency stack available, or use our background-less 2D plotting functionality instead.')
+		return False
 
 	template = path.abspath(path.expanduser(template))
 	animal_df = skullsweep.load_data(skullsweep_data)
