@@ -1,4 +1,6 @@
 argh>=0.26.2
 numpy
+nibabel
+nilearn
 pandas>=0.17
 matplotlib>=2.0.0
