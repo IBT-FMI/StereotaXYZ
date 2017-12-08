@@ -78,7 +78,7 @@ def plot_yz(df,
 	if stereotaxis_style_angle:
 		angle += 90
 	angle = np.radians(angle)
-        slope = np.tan(angle)
+	slope = np.tan(angle)
 
 	if target:
 		if isinstance(target, dict):
