@@ -9,7 +9,10 @@ from nilearn.plotting import plot_stat_map, plot_roi, plot_anat
 from os import path
 from stereotaxyz import skullsweep
 
-def plot_yz(df, target, entry, angle,
+def plot_yz(df,
+	target="",
+	entry=[],
+	angle=0.,
 	resolution=1000,
 	stereotaxis_style_angle=True,
 	color_skull='gray',
@@ -25,10 +28,33 @@ def plot_yz(df, target, entry, angle,
 
 	df : pandas.DataFrame
 		A Pandas DataFrame object containing columns named 'posteroanterior', 'inferosuperior', and 'ID'.
-	target : str or dict or list
+	target : str or dict or listi, optional
 		Either a string giving the 'ID' column in the `df` input which denotes the target structure row; or a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
-	entry : dict or list
+	entry : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
+	angle : float, optional
+		Angle in the YZ-plane.
+		The angle can be given with respect to the posterioanterior axis (set `stereotaxis_style_angle` to `False`) or with respect to the inferosuperior axis (set `stereotaxis_style_angle` to `True`).
+	resolution : int, optional
+		Resolution at which to sample the coordinate space.
+	stereotaxis_style_angle : bool, optional
+		Whether to set the angle reative to the inferosuperior axis (the other alternative - corresponding to this variable being set to `False` - is that the angle is interpreted as relative to the posteroanterior axis).
+	color_skull : str, optional
+		Color with which the skull points are to be drawn (this has to be a Matplotlib interpretable string).
+		Setting this to an empty string will disable plotting of respective feature.
+	color_target : str, optional
+		Color with which the target point is to be drawn (this has to be a Matplotlib interpretable string).
+		Setting this to an empty string will disable plotting of respective feature.
+	color_implant : str, optional
+		Color with which the implant and implant axis are to be drawn (this has to be a Matplotlib interpretable string).
+		Setting this to an empty string will disable plotting of respective feature.
+	color_entry : str, optional
+		Color with which the implant entry point is to be drawn (this has to be a Matplotlib interpretable string).
+		Setting this to an empty string will disable plotting of respective feature.
+	color_entry : str, optional
+		Color with which the skull projection points on the implant axis are to be drawn (this has to be a Matplotlib interpretable string).
+		Setting this to an empty string will disable plotting of respective feature.
+		This is mainly a debugging feature.
 	"""
 
 	plt.figure()
@@ -43,32 +69,34 @@ def plot_yz(df, target, entry, angle,
 	angle = np.radians(angle)
         slope = np.tan(angle)
 
-	x = np.linspace(x_min,x_max,resolution)
-	if isinstance(target, dict):
-                x_offset = target['posteroanterior']
-                y_offset = target['inferosuperior']
-        try:
-                x_offset = df[df['ID']==target]['posteroanterior'].values[0]
-                y_offset = df[df['ID']==target]['inferosuperior'].values[0]
-	except KeyError:
-		x_offset, y_offset = target
-	intercept = -x_offset*slope + y_offset
-
-	y = x*slope + intercept
+	if target:
+		if isinstance(target, dict):
+			x_offset = target['posteroanterior']
+			y_offset = target['inferosuperior']
+		try:
+			x_offset = df[df['ID']==target]['posteroanterior'].values[0]
+			y_offset = df[df['ID']==target]['inferosuperior'].values[0]
+		except KeyError:
+			x_offset, y_offset = target
+		intercept = -x_offset*slope + y_offset
+		x = np.linspace(x_min,x_max,resolution)
+		y = x*slope + intercept
 
 	if color_skull:
 		ax.scatter(df[df['tissue']=='skull']['posteroanterior'], df[df['tissue']=='skull']['inferosuperior'], color=color_skull)
-	if color_implant:
-		ax.plot(x,y,color=color_implant)
-	if color_target:
-		ax.scatter(x_offset, y_offset, color=color_target)
-	if color_projection:
-		ax.scatter(df[df['tissue']=='skull']['posteroanterior (implant projection)'], df[df['tissue']=='skull']['inferosuperior (implant projection)'], color=color_projection)
+	if target:
+		if color_implant:
+			ax.plot(x,y,color=color_implant)
+		if color_target:
+			ax.scatter(x_offset, y_offset, color=color_target)
+		if color_projection:
+			ax.scatter(df[df['tissue']=='skull']['posteroanterior (implant projection)'], df[df['tissue']=='skull']['inferosuperior (implant projection)'], color=color_projection)
 	if color_entry:
 		try:
 			ax.scatter(entry['posteroanterior'], entry['inferosuperior'], color=color_entry, marker='v')
 		except TypeError:
-			ax.scatter(entry[0], entry[1], color=color_entry, marker='v')
+			if len(entry) >= 2:
+				ax.scatter(entry[0], entry[1], color=color_entry, marker='v')
 
 def co_plot(target, skullsweep_data,
 	yz_angle=0,
