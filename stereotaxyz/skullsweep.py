@@ -6,64 +6,6 @@ import matplotlib.pyplot as plt
 from os import path
 from copy import deepcopy
 
-def _implant_by_angle(angle, target, df,
-	ax = False,
-	color = 'c',
-	plot_projections='best',
-	display=False,
-	):
-	"""Calculate and print injection or implant entry pint and length required to each a specified target at a specified angle.
-
-	Parameters
-	----------
-
-	angle: int
-		The desired angle of the implant or injection in degrees. Note that the angle value is defined as 0 if the implant heads in posterior to anterior, and 180 if it heads in anterior to posterior.
-	"""
-
-	if not ax and display:
-		plt.figure()
-		plt.axis('equal')
-		ax = plt.axes()
-
-	real_angle = 180-angle
-	df_ = deepcopy(df)
-	resolution = 1000
-	x_min = df['posteroanterior'].min()-1
-	x_max = df['posteroanterior'].max()+1
-	x = np.linspace(x_min,x_max,resolution)
-	rad_angle = np.radians(real_angle)
-	slope = np.tan(rad_angle)
-	if isinstance(target, dict):
-		x_offset = target['posteroanterior']
-		y_offset = target['inferosuperior']
-	else:
-		x_offset = df_[df_['ID']==target]['posteroanterior'].values[0]
-		y_offset = df_[df_['ID']==target]['inferosuperior'].values[0]
-	intercept = -x_offset*slope + y_offset
-	y = x*slope + intercept
-	df_['inferosuperior '+str(angle)]=df_['posteroanterior']*slope + intercept
-	if plot_projections == 'all':
-		if display:
-			ax.scatter(df_[df_['tissue']=='skull']['posteroanterior'], df_[df_['tissue']=='skull']['inferosuperior '+str(angle)], color=color)
-	elif plot_projections == 'best':
-		df_['projection distance'] = df_['inferosuperior '+str(angle)]-df_['inferosuperior']
-		closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
-		pa_in = df_[df_['projection distance'].abs()==closest]['posteroanterior'].values[0]
-		is_in = df_[df_['projection distance'].abs()==closest]['inferosuperior '+str(angle)].values[0]
-		is_in -= np.sin(rad_angle)*closest
-		pa_in -= np.cos(rad_angle)*closest
-		implant_length = ((is_in-y_offset)**2+(pa_in-x_offset)**2)**(1/2.)
-		if display:
-			ax.scatter(pa_in, is_in, color=color)
-		print('For {}°:'.format(angle))
-		print('Posteroanterior: {0:.2f}'.format(pa_in))
-		print('Inferosuperior: {0:.2f}'.format(is_in))
-		print('Implant Length: {0:.2f}'.format(implant_length))
-	if display:
-		ax.plot(x,y,color=color)
-	return slope, intercept, pa_in, is_in
-
 def implant_by_angle(target, df,
 	stereotaxis_style_angle=True,
 	resolution=1000,
