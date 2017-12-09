@@ -8,4 +8,4 @@ df = skullsweep.load_data(data_file, ultimate_reference='bregma')
 
 t, x,y,z, df = skullsweep.implant_by_angle('VTA', df, yz_angle=45.,)
 entry = [x,y,z]
-plotting.plot_xyz('VTA', df, entry=entry, projection_color='c', save_as='basic3d.png')
+plotting.xyz(df, 'VTA', entry=entry, projection_color='c', save_as='basic3d.png')

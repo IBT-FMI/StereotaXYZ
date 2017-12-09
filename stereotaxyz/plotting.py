@@ -11,7 +11,7 @@ from stereotaxyz import skullsweep
 
 THIS_PATH = path.dirname(path.realpath(__file__))
 
-def plot_yz(df,
+def yz(df,
 	target="",
 	entry=[],
 	angle=0.,
@@ -138,7 +138,8 @@ def plot_yz(df,
 		save_as = path.abspath(path.expanduser(save_as))
 		plt.savefig(save_as)
 
-def plot_xyz(target, df,
+def xyz(df,
+	target="",
 	entry=[],
 	axis_cut='x',
 	custom_style=False,
@@ -189,25 +190,28 @@ def plot_xyz(target, df,
 	skull_img = make_nii(skull_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
 	skull_color = matplotlib.colors.ListedColormap(['#909090'], name='skull_color')
 
-	if type(target) is tuple and len(target) == 3:
-		target_coords = [target]
-	elif type(target) is list and len(target) == 3:
-		target_coords = [tuple(target)]
-	else:
-		target_df = df[df['ID']==target]
-		try:
-			target_x = target_df['leftright'].item()
-		except KeyError:
-			target_x = 0
-		try:
-			target_y = target_df['posteroanterior'].item()
-		except KeyError:
-			target_y = 0
-		try:
-			target_z = target_df['inferosuperior'].item()
-		except KeyError:
-			target_z = 0
-		target_coords = [(target_x, target_y, target_z)]
+	if target:
+		if type(target) is [tuple, list] and len(target) == 3:
+			target_x, target_y, target_z = target
+		elif isinstance(target, dict):
+			target_x = target['leftright']
+			target_y = target['posteroanterior']
+			target_z = target['inferosuperior']
+		else:
+			target_df = df[df['ID']==target]
+			try:
+				target_x = target_df['leftright'].item()
+			except KeyError:
+				target_x = 0
+			try:
+				target_y = target_df['posteroanterior'].item()
+			except KeyError:
+				target_y = 0
+			try:
+				target_z = target_df['inferosuperior'].item()
+			except KeyError:
+				target_z = 0
+			target_coords = [(target_x, target_y, target_z)]
 	if text_output:
 		print(target_coords)
 
@@ -245,7 +249,8 @@ def plot_xyz(target, df,
 		alpha=1.0,
 		)
 	display.add_overlay(skull_img, cmap=skull_color)
-	display.add_markers(target_coords, marker_color='#E5E520', marker_size=200)
+	if target:
+		display.add_markers(target_coords, marker_color='#E5E520', marker_size=200)
 	display.add_markers(insertion_site, marker_color='#FFFFFF', marker_size=200)
 	if projection_color:
 		display.add_overlay(projection_img, cmap=projection_color)
