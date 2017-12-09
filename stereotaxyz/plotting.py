@@ -140,7 +140,7 @@ def yz(df,
 
 def xyz(df,
 	target="",
-	entry=[],
+	incision=[],
 	axis_cut='x',
 	custom_style=False,
 	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
@@ -162,7 +162,7 @@ def xyz(df,
 		Desired angle of entry.
 	axis_cut : {'x',}
 		Perpendicularly to which axis the image should be cut for display.
-	entry : dict or list, optional
+	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
 	custom_style : bool
 		Whether to forego the application of a default style.
@@ -192,43 +192,42 @@ def xyz(df,
 
 	if target:
 		if type(target) is [tuple, list] and len(target) == 3:
-			target_x, target_y, target_z = target
+			x_target, y_target, z_target = target
 		elif isinstance(target, dict):
-			target_x = target['leftright']
-			target_y = target['posteroanterior']
-			target_z = target['inferosuperior']
+			x_target = target['leftright']
+			y_target = target['posteroanterior']
+			z_target = target['inferosuperior']
 		else:
-			target_df = df[df['ID']==target]
-			try:
-				target_x = target_df['leftright'].item()
-			except KeyError:
-				target_x = 0
-			try:
-				target_y = target_df['posteroanterior'].item()
-			except KeyError:
-				target_y = 0
-			try:
-				target_z = target_df['inferosuperior'].item()
-			except KeyError:
-				target_z = 0
-			target_coords = [(target_x, target_y, target_z)]
-	if text_output:
-		print(target_coords)
+			x_target = df[df['ID']==target]['leftright'].item()
+			y_target = df[df['ID']==target]['posteroanterior'].item()
+			z_target = df[df['ID']==target]['inferosuperior'].item()
+			target_coords = [(x_target, y_target, z_target)]
 
-	if entry:
+	if incision:
 		try:
-			x_entry = entry['leftright']
-			y_entry = entry['posteroanterior']
-			z_entry = entry['inferosuperior']
+			x_incisison = incision['leftright']
+			y_incisison = incision['posteroanterior']
+			z_incisison = incision['inferosuperior']
 		except TypeError:
-			x_entry, y_entry, z_entry = entry
-	insertion_site = [(x_entry, y_entry, z_entry)]
+			x_incision, y_incision, z_incision = incision
+	else:
+		x_incision = df[df['ID']=='incision']['leftright'].item()
+		y_incision = df[df['ID']=='incision']['posteroanterior'].item()
+		z_incision = df[df['ID']=='incision']['inferosuperior'].item()
 
+	incision_coords = [(x_incision, y_incision, z_incision)]
+
+	implant_length = ((x_target-x_incision)**2+(y_target-y_incision)**2+(z_target-z_incision)**2)**(1/2)
+	print(df)
+	print(implant_length)
+
+	#return
 	if projection_color:
-		df['posteroanterior'] = df['posteroanterior (implant projection)']
-		df['inferosuperior'] = df['inferosuperior (implant projection)']
-		df['leftright'] = df['leftright (implant projection)']
-		projection_img = make_nii(df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
+		skull_df_ = deepcopy(skull_df)
+		skull_df_['posteroanterior'] = skull_df_['posteroanterior (implant projection)']
+		skull_df_['inferosuperior'] = skull_df_['inferosuperior (implant projection)']
+		skull_df_['leftright'] = skull_df_['leftright (implant projection)']
+		projection_img = make_nii(skull_df_, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
 		projection_color = matplotlib.colors.ListedColormap([projection_color], name='projection_color')
 
 	# Start actual plotting:
@@ -251,7 +250,7 @@ def xyz(df,
 	display.add_overlay(skull_img, cmap=skull_color)
 	if target:
 		display.add_markers(target_coords, marker_color='#E5E520', marker_size=200)
-	display.add_markers(insertion_site, marker_color='#FFFFFF', marker_size=200)
+	display.add_markers(incision_coords, marker_color='#FFFFFF', marker_size=200)
 	if projection_color:
 		display.add_overlay(projection_img, cmap=projection_color)
 	if save_as:
@@ -263,6 +262,7 @@ def make_nii(df_slice,
 	):
 	"""Create a NIfTI based on a dataframe containing bregma-relative skullsweep points, and a bregma-origin template.
 	"""
+	#print(df_slice)
 	template = nib.load(path.abspath(path.expanduser(template)))
 	affine = template.affine
 	data = np.zeros(shape=template.shape)

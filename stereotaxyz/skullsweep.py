@@ -36,21 +36,33 @@ def implant_by_angle(target, df,
 		y_offset = df_[df_['ID']==target]['posteroanterior'].values[0]
 		z_offset = df_[df_['ID']==target]['inferosuperior'].values[0]
 	increment = [
-		np.tan(xz_angle)*np.cos(composite_angle),
-		np.tan(yz_angle)*np.cos(composite_angle),
-		np.cos(composite_angle),
+		np.sin(xz_angle),
+		np.sin(yz_angle),
+		np.cos(xz_angle)*np.cos(yz_angle),
 		]
-	df_['t'] = (df_['leftright']-x_offset)*increment[0] + (df_['posteroanterior']-y_offset)*increment[1] + (df_['inferosuperior']-z_offset)*increment[2]
-	df_['leftright (implant projection)'] = df_['t']*increment[0] + x_offset
-	df_['posteroanterior (implant projection)'] = df_['t']*increment[1] + y_offset
-	df_['inferosuperior (implant projection)'] = df_['t']*increment[2] + z_offset
-	df_['projection distance'] = ((df_['leftright']-x_offset)**2 + (df_['posteroanterior']-y_offset)**2 + (df_['inferosuperior']-z_offset)**2 - df_['t']**2)**(1./2)
+	df_['projection t'] = (df_['leftright']-x_offset)*float(increment[0]) + (df_['posteroanterior']-y_offset)*float(increment[1]) + (df_['inferosuperior']-z_offset)*float(increment[2])
+	df_['leftright (implant projection)'] = df_['projection t']*increment[0] + x_offset
+	df_['posteroanterior (implant projection)'] = df_['projection t']*increment[1] + y_offset
+	df_['inferosuperior (implant projection)'] = df_['projection t']*increment[2] + z_offset
+	df_['projection distance'] = ((df_['leftright']-x_offset)**2 + (df_['posteroanterior']-y_offset)**2 + (df_['inferosuperior']-z_offset)**2 - df_['projection t']**2)**(1./2)
 	closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
 	posteroanterior = df_[df_['projection distance'].abs()==closest]['posteroanterior (implant projection)'].values[0]
 	inferosuperior = df_[df_['projection distance'].abs()==closest]['inferosuperior (implant projection)'].values[0]
 	leftright = df_[df_['projection distance'].abs()==closest]['leftright (implant projection)'].values[0]
-	t = df_[df_['projection distance'].abs()==closest]['t'].values[0]
-	return t, leftright, posteroanterior, inferosuperior, df_
+	t = df_[df_['projection distance'].abs()==closest]['projection t'].values[0]
+	references = df_['reference'].tolist()
+	# Select the most frequent reference:
+	reference = max(set(references), key=references.count)
+	df_ = df_.append({
+			'ID' : 'incision',
+			'reference' : reference,
+			'leftright' : leftright,
+			'posteroanterior' : posteroanterior,
+			'inferosuperior' : inferosuperior,
+			'projection t' : t,
+			},
+		ignore_index=True)
+	return increment, df_
 
 def draw_anatomy(df,):
 	"""Draw skull and brain ROI locations listed in a `pandas.DataFrame` object.
