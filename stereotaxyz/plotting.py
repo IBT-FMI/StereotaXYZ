@@ -4,6 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
+import pandas as pd
 from copy import deepcopy
 from matplotlib import rcParams
 from os import path
@@ -191,7 +192,7 @@ def xyz(df,
 	template = path.abspath(path.expanduser(template))
 
 	skull_df = df[df['tissue']=='skull']
-	skull_img = make_nii(skull_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
+	skull_img = make_nii(skull_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=0.2)
 	skull_color = matplotlib.colors.ListedColormap(['#909090'], name='skull_color')
 
 	if target:
@@ -222,8 +223,26 @@ def xyz(df,
 	incision_coords = [(x_incision, y_incision, z_incision)]
 
 	implant_length = ((x_target-x_incision)**2+(y_target-y_incision)**2+(z_target-z_incision)**2)**(1/2)
-	print(df)
-	print(implant_length)
+
+	x_increment = (x_incision-x_target)/float(implant_length)
+	y_increment = (y_incision-y_target)/float(implant_length)
+	z_increment = (z_incision-z_target)/float(implant_length)
+
+	implant_resolution = 100
+	implant_t = np.linspace(0, implant_length, implant_resolution)
+	implant_df = pd.DataFrame(
+			np.column_stack([
+				implant_t*x_increment+x_target,
+				implant_t*y_increment+y_target,
+				implant_t*z_increment+z_target,
+				]),
+                        columns=[
+				'leftright',
+				'posteroanterior',
+				'inferosuperior',
+				])
+	implant_img = make_nii(implant_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
+	implant_color = matplotlib.colors.ListedColormap(['#909090'], name='implant_color')
 
 	#return
 	if projection_color:
@@ -231,7 +250,7 @@ def xyz(df,
 		skull_df_['posteroanterior'] = skull_df_['posteroanterior (implant projection)']
 		skull_df_['inferosuperior'] = skull_df_['inferosuperior (implant projection)']
 		skull_df_['leftright'] = skull_df_['leftright (implant projection)']
-		projection_img = make_nii(skull_df_, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
+		projection_img = make_nii(skull_df_, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=0.2)
 		projection_color = matplotlib.colors.ListedColormap([projection_color], name='projection_color')
 
 	# Start actual plotting:
@@ -255,6 +274,7 @@ def xyz(df,
 	if target:
 		display.add_markers(target_coords, marker_color='#E5E520', marker_size=200)
 	display.add_markers(incision_coords, marker_color='#FFFFFF', marker_size=200)
+	display.add_contours(implant_img)
 	if projection_color:
 		display.add_overlay(projection_img, cmap=projection_color)
 	if save_as:
@@ -263,28 +283,40 @@ def xyz(df,
 
 def make_nii(df_slice,
 	template='/home/chymera/ni_data/templates/DSURQEc_200micron_average.nii',
+	resolution=0.1,
 	):
 	"""Create a NIfTI based on a dataframe containing bregma-relative skullsweep points, and a bregma-origin template.
 	"""
-	#print(df_slice)
+
 	template = nib.load(path.abspath(path.expanduser(template)))
 	affine = template.affine
-	data = np.zeros(shape=template.shape)
+	affine_factor = [
+		int(round(np.abs(affine[0,0]/float(resolution)))),
+		int(round(np.abs(affine[1,1]/float(resolution)))),
+		int(round(np.abs(affine[2,2]/float(resolution)))),
+		]
+	affine[0,0] = affine[1,1] = affine[2,2] = resolution
+	shape = [
+		int(template.shape[0]*affine_factor[0]),
+		int(template.shape[1]*affine_factor[1]),
+		int(template.shape[2]*affine_factor[2]),
+		]
+	data = np.zeros(shape=tuple(shape))
 	for ix, point in df_slice.iterrows():
 		try:
-			x = point['posteroanterior']
+			y = point['posteroanterior']
 		except KeyError:
 			try:
-				x = -point['anteroposterior']
-			except KeyError:
-				x = 0
-		try:
-			y = point['leftright']
-		except KeyError:
-			try:
-				y = -point['rightleft']
+				y = -point['anteroposterior']
 			except KeyError:
 				y = 0
+		try:
+			x = point['leftright']
+		except KeyError:
+			try:
+				x = -point['rightleft']
+			except KeyError:
+				x = 0
 		try:
 			z = point['inferosuperior']
 		except KeyError:
@@ -292,13 +324,13 @@ def make_nii(df_slice,
 				z = -point['superoinferior']
 			except KeyError:
 				z = 0
-		new_y = (-y-affine[0,3])/affine[0,0]
-		new_y = int(round(new_y))
-		new_x = (x-affine[1,3])/affine[1,1]
+		new_x = (-x-affine[0,3])/affine[0,0]
 		new_x = int(round(new_x))
+		new_y = (y-affine[1,3])/affine[1,1]
+		new_y = int(round(new_y))
 		new_z = (z-affine[2,3])/affine[2,2]
 		new_z = int(round(new_z))
-		data[new_y,new_x,new_z] = 1
+		data[new_x,new_y,new_z] = 1
 
 	new_image = nib.Nifti1Image(data, affine=affine)
 	return new_image
