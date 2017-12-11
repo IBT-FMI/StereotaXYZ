@@ -13,14 +13,14 @@ THIS_PATH = path.dirname(path.realpath(__file__))
 
 def yz(df,
 	target="",
-	entry=[],
+	incision=[],
 	angle=0.,
 	resolution=1000,
 	stereotaxis_style_angle=True,
 	color_skull='gray',
 	color_target='orange',
 	color_implant='c',
-	color_entry='r',
+	color_incision='r',
 	color_projection='',
 	custom_style=False,
 	implant_axis=True,
@@ -35,7 +35,7 @@ def yz(df,
 		A Pandas DataFrame object containing columns named 'posteroanterior', 'inferosuperior', and 'ID'.
 	target : str or dict or listi, optional
 		Either a string giving the 'ID' column in the `df` input which denotes the target structure row; or a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
-	entry : dict or list, optional
+	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
 	angle : float, optional
 		Angle in the YZ-plane.
@@ -53,10 +53,10 @@ def yz(df,
 	color_implant : str, optional
 		Color with which the implant and implant axis are to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
-	color_entry : str, optional
-		Color with which the implant entry point is to be drawn (this has to be a Matplotlib interpretable string).
+	color_incision : str, optional
+		Color with which the incison point is to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
-	color_entry : str, optional
+	color_projection : str, optional
 		Color with which the skull projection points on the implant axis are to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
 		This is mainly a debugging feature.
@@ -95,12 +95,16 @@ def yz(df,
 		x = np.linspace(x_min,x_max,resolution)
 		y = x*slope + intercept
 
-	if entry:
+	if incision:
 		try:
-			x_entry = entry['posteroanterior']
-			y_entry = entry['inferosuperior']
+			x_incision = incision['posteroanterior']
+			y_incision = incision['inferosuperior']
 		except TypeError:
-			x_entry, y_entry = entry
+			x_incision, y_incision = incision
+	else:
+		x_incision = df[df['ID']=='incision']['posteroanterior'].values[0]
+		y_incision = df[df['ID']=='incision']['inferosuperior'].values[0]
+
 
 	legend_handles = []
 	legend_names = []
@@ -111,20 +115,20 @@ def yz(df,
 	if target:
 		if color_implant and implant_axis:
 			implant_axis_plot, = ax.plot(x, y, color=color_implant, linewidth=rcParams['lines.linewidth']*0.5, label='Implant Axis')
-		if color_target:
-			target_plot = ax.scatter(x_offset, y_offset, color=color_target)
-			legend_handles.append(target_plot)
-			legend_names.append("Target")
 		if color_projection:
 			skull_projection_plot = ax.scatter(df[df['tissue']=='skull']['posteroanterior (implant projection)'], df[df['tissue']=='skull']['inferosuperior (implant projection)'], color=color_projection)
 			legend_handles.append(skull_projection_plot)
 			legend_names.append("Skull Projection")
-	if entry and color_entry:
-		entry_plot = ax.scatter(x_entry, y_entry, color=color_entry, marker='D')
-		legend_handles.append(entry_plot)
+		if color_target:
+			target_plot = ax.scatter(x_offset, y_offset, color=color_target)
+			legend_handles.append(target_plot)
+			legend_names.append("Target")
+	if (x_incision and y_incision) and color_incision:
+		incision_plot = ax.scatter(x_incision, y_incision, color=color_incision, marker='D')
+		legend_handles.append(incision_plot)
 		legend_names.append("Entry Point")
-	if entry and target and color_implant:
-		implant_plot, = ax.plot([x_entry, x_offset],[y_entry,y_offset],  color=color_implant, linewidth=rcParams['lines.linewidth']*2.)
+	if (x_incision and y_incision) and target and color_implant:
+		implant_plot, = ax.plot([x_incision, x_offset],[y_incision,y_offset],  color=color_implant, linewidth=rcParams['lines.linewidth']*2.)
 		legend_handles.append(implant_plot)
 		legend_names.append("Implant")
 	# These (less important) items should be at the end of the legend, though they should also be plotted underneath (i.e. before) all others.
@@ -148,7 +152,7 @@ def xyz(df,
 	projection_color='',
 	save_as='',
 	):
-	"""Co-plot of skullsweep data points together with target and best entry point coordinates (as computed based on the skullsweep data and the angle of entry).
+	"""Co-plot of skullsweep data points together with target and incision coordinates (as computed based on the skullsweep data and the angle of entry).
 
 	Parameters
 	----------

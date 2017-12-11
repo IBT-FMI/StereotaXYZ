@@ -8,7 +8,5 @@ df = skullsweep.load_data(data_file, ultimate_reference='bregma')
 
 increment, df = skullsweep.implant_by_angle('VTA', df, yz_angle=30.,)
 
-#implant_df = make_nii()
-#print(df)
 plotting.xyz(df, 'VTA', projection_color='c', save_as='basic3d.png')
 plt.show()
