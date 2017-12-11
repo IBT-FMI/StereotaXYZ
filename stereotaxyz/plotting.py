@@ -20,11 +20,11 @@ def yz(df,
 	stereotaxis_style_angle=True,
 	color_skull='gray',
 	color_target='orange',
-	color_implant='c',
+	color_insertion='c',
 	color_incision='r',
 	color_projection='',
 	custom_style=False,
-	implant_axis=True,
+	insertion_axis=True,
 	save_as = '',
 	):
 	"""Create a 2D plot (along the YZ plane) containing structures of interest recorded in a StereotaXYZ-style (e.g. `stereotaxyz.skullsweep`-outputted) DataFrame.
@@ -51,21 +51,26 @@ def yz(df,
 	color_target : str, optional
 		Color with which the target point is to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
-	color_implant : str, optional
-		Color with which the implant and implant axis are to be drawn (this has to be a Matplotlib interpretable string).
+	color_insertion : str, optional
+		Color with which the insertion and insertion axis are to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
 	color_incision : str, optional
 		Color with which the incison point is to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
 	color_projection : str, optional
-		Color with which the skull projection points on the implant axis are to be drawn (this has to be a Matplotlib interpretable string).
+		Color with which the skull projection points on the insertion axis are to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
 		This is mainly a debugging feature.
-	implant_axis : bool, optional
-		Whether to plot the implant axis.
+	insertion_axis : bool, optional
+		Whether to plot the insertion axis.
 	save_as : str
 		Path under which to save the output image.
 	"""
+
+	leftrights = df['leftright'].unique()
+	leftright = leftrights[0]
+	if len(leftrights) > 1:
+		print('WARNING: The DataFrame you have passed to `stereotaxyz.plotting.yz()` contains multiple leftright axis specifications, namely: "{}". We will assume that all values are aligned leftright at {}mm. This means that some of the computations and/or the leftright specification for the output may be wrong.'.format(leftrights, leftright))
 
 	# Start actual plotting:
 	if not custom_style:
@@ -78,6 +83,7 @@ def yz(df,
 	x_min = df['posteroanterior'].min()-1
 	x_max = df['posteroanterior'].max()+1
 
+	input_angle = angle
 	if stereotaxis_style_angle:
 		angle += 90
 	angle = np.radians(angle)
@@ -114,10 +120,10 @@ def yz(df,
 		legend_handles.append(skull_plot)
 		legend_names.append("Skull")
 	if target:
-		if color_implant and implant_axis:
-			implant_axis_plot, = ax.plot(x, y, color=color_implant, linewidth=rcParams['lines.linewidth']*0.5, label='Implant Axis')
+		if color_insertion and insertion_axis:
+			insertion_axis_plot, = ax.plot(x, y, color=color_insertion, linewidth=rcParams['lines.linewidth']*0.5, label='Insertion Axis')
 		if color_projection:
-			skull_projection_plot = ax.scatter(df[df['tissue']=='skull']['posteroanterior (implant projection)'], df[df['tissue']=='skull']['inferosuperior (implant projection)'], color=color_projection)
+			skull_projection_plot = ax.scatter(df[df['tissue']=='skull']['posteroanterior (insertion projection)'], df[df['tissue']=='skull']['inferosuperior (insertion projection)'], color=color_projection)
 			legend_handles.append(skull_projection_plot)
 			legend_names.append("Skull Projection")
 		if color_target:
@@ -127,18 +133,35 @@ def yz(df,
 	if (x_incision and y_incision) and color_incision:
 		incision_plot = ax.scatter(x_incision, y_incision, color=color_incision, marker='D')
 		legend_handles.append(incision_plot)
-		legend_names.append("Entry Point")
-	if (x_incision and y_incision) and target and color_implant:
-		implant_plot, = ax.plot([x_incision, x_offset],[y_incision,y_offset],  color=color_implant, linewidth=rcParams['lines.linewidth']*2.)
-		legend_handles.append(implant_plot)
-		legend_names.append("Implant")
+		legend_names.append("Incision [PA/IS={:.2f}/{:.2f}mm]".format(x_incision, y_incision))
+	if (x_incision and y_incision) and target and color_insertion:
+		insertion_plot, = ax.plot([x_incision, x_offset],[y_incision,y_offset],  color=color_insertion, linewidth=rcParams['lines.linewidth']*2.)
+		legend_handles.append(insertion_plot)
+		insertion_length = np.abs(df[df['ID']=='incision']['projection t'].item())
+		legend_names.append("Insertion [{:.2f}mm]".format(insertion_length))
+
 	# These (less important) items should be at the end of the legend, though they should also be plotted underneath (i.e. before) all others.
 	try:
-		legend_handles.append(implant_axis_plot)
-		legend_names.append("Implant Axis")
+		legend_handles.append(insertion_axis_plot)
+		legend_names.append("Insertion Axis")
 	except NameError:
 		pass
 	legend = ax.legend(legend_handles, legend_names)
+
+	references = df['reference'].unique()
+	reference = references[0]
+	if len(references) > 1:
+		print('WARNING: The DataFrame you have passed to `stereotaxyz.plotting.yz()` contains rows referenced to multiple values, namely: "{}". We will assume that all values are referenced to {}. This means that some of the computations and/or the reference specification for the output may be wrong.'.format(references, reference))
+
+	ax.set_xlabel('Posteroanterior({}) [mm]'.format(reference))
+	ax.set_ylabel('Inferosuperior({}) [mm]'.format(reference))
+
+	ax.set_title(u'{}° Insertion | Leftright({}) = {:.2f}mm'.format(
+		input_angle,
+		reference,
+		leftright,
+		))
+
 	if save_as:
 		save_as = path.abspath(path.expanduser(save_as))
 		plt.savefig(save_as)
@@ -174,7 +197,7 @@ def xyz(df,
 	template : str
 		Path to template (generally an anatomical image) to be used as background.
 	text_output : bool
-		Whether to print relevant output (computed enrty point coordinates and recommended implant length) to the command line.
+		Whether to print relevant output (computed enrty point coordinates and recommended insertion length) to the command line.
 	save_as : str
 		Path under which to save the output image.
 
@@ -222,34 +245,34 @@ def xyz(df,
 
 	incision_coords = [(x_incision, y_incision, z_incision)]
 
-	implant_length = ((x_target-x_incision)**2+(y_target-y_incision)**2+(z_target-z_incision)**2)**(1/2)
+	insertion_length = ((x_target-x_incision)**2+(y_target-y_incision)**2+(z_target-z_incision)**2)**(1/2)
 
-	x_increment = (x_incision-x_target)/float(implant_length)
-	y_increment = (y_incision-y_target)/float(implant_length)
-	z_increment = (z_incision-z_target)/float(implant_length)
+	x_increment = (x_incision-x_target)/float(insertion_length)
+	y_increment = (y_incision-y_target)/float(insertion_length)
+	z_increment = (z_incision-z_target)/float(insertion_length)
 
-	implant_resolution = 100
-	implant_t = np.linspace(0, implant_length, implant_resolution)
-	implant_df = pd.DataFrame(
+	insertion_resolution = 100
+	insertion_t = np.linspace(0, insertion_length, insertion_resolution)
+	insertion_df = pd.DataFrame(
 			np.column_stack([
-				implant_t*x_increment+x_target,
-				implant_t*y_increment+y_target,
-				implant_t*z_increment+z_target,
+				insertion_t*x_increment+x_target,
+				insertion_t*y_increment+y_target,
+				insertion_t*z_increment+z_target,
 				]),
                         columns=[
 				'leftright',
 				'posteroanterior',
 				'inferosuperior',
 				])
-	implant_img = make_nii(implant_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
-	implant_color = matplotlib.colors.ListedColormap(['#909090'], name='implant_color')
+	insertion_img = make_nii(insertion_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
+	insertion_color = matplotlib.colors.ListedColormap(['#909090'], name='insertion_color')
 
 	#return
 	if projection_color:
 		skull_df_ = deepcopy(skull_df)
-		skull_df_['posteroanterior'] = skull_df_['posteroanterior (implant projection)']
-		skull_df_['inferosuperior'] = skull_df_['inferosuperior (implant projection)']
-		skull_df_['leftright'] = skull_df_['leftright (implant projection)']
+		skull_df_['posteroanterior'] = skull_df_['posteroanterior (insertion projection)']
+		skull_df_['inferosuperior'] = skull_df_['inferosuperior (insertion projection)']
+		skull_df_['leftright'] = skull_df_['leftright (insertion projection)']
 		projection_img = make_nii(skull_df_, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=0.2)
 		projection_color = matplotlib.colors.ListedColormap([projection_color], name='projection_color')
 
@@ -274,7 +297,7 @@ def xyz(df,
 	if target:
 		display.add_markers(target_coords, marker_color='#E5E520', marker_size=200)
 	display.add_markers(incision_coords, marker_color='#FFFFFF', marker_size=200)
-	display.add_contours(implant_img)
+	display.add_contours(insertion_img)
 	if projection_color:
 		display.add_overlay(projection_img, cmap=projection_color)
 	if save_as:

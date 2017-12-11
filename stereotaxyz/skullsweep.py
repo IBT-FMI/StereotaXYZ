@@ -6,19 +6,19 @@ import matplotlib.pyplot as plt
 from os import path
 from copy import deepcopy
 
-def implant_by_angle(target, df,
+def insert_by_angle(target, df,
 	stereotaxis_style_angle=True,
 	resolution=1000,
 	xz_angle=0.,
 	yz_angle=0.,
 	):
-	"""Calculate and print injection or implant entry pint and length required to each a specified target at a specified angle.
+	"""Calculate and print insertion length and incision point required to each a specified target at a specified angle.
 
 	Parameters
 	----------
 
 	angle: int
-		The desired angle of the implant or injection in degrees. Note that the angle value is defined as 0 if the implant heads in posterior to anterior, and 180 if it heads in anterior to posterior.
+		The desired insertion angle, in degrees. Note that the angle value is defined as 0 if the insertion heads in posterior to anterior, and 180 if it heads in anterior to posterior.
 	"""
 	if stereotaxis_style_angle:
 		xz_angle = xz_angle
@@ -41,14 +41,14 @@ def implant_by_angle(target, df,
 		np.cos(xz_angle)*np.cos(yz_angle),
 		]
 	df_['projection t'] = (df_['leftright']-x_offset)*float(increment[0]) + (df_['posteroanterior']-y_offset)*float(increment[1]) + (df_['inferosuperior']-z_offset)*float(increment[2])
-	df_['leftright (implant projection)'] = df_['projection t']*increment[0] + x_offset
-	df_['posteroanterior (implant projection)'] = df_['projection t']*increment[1] + y_offset
-	df_['inferosuperior (implant projection)'] = df_['projection t']*increment[2] + z_offset
+	df_['leftright (insertion projection)'] = df_['projection t']*increment[0] + x_offset
+	df_['posteroanterior (insertion projection)'] = df_['projection t']*increment[1] + y_offset
+	df_['inferosuperior (insertion projection)'] = df_['projection t']*increment[2] + z_offset
 	df_['projection distance'] = ((df_['leftright']-x_offset)**2 + (df_['posteroanterior']-y_offset)**2 + (df_['inferosuperior']-z_offset)**2 - df_['projection t']**2)**(1./2)
 	closest = df_[df_['tissue']=='skull']['projection distance'].abs().min()
-	posteroanterior = df_[df_['projection distance'].abs()==closest]['posteroanterior (implant projection)'].values[0]
-	inferosuperior = df_[df_['projection distance'].abs()==closest]['inferosuperior (implant projection)'].values[0]
-	leftright = df_[df_['projection distance'].abs()==closest]['leftright (implant projection)'].values[0]
+	posteroanterior = df_[df_['projection distance'].abs()==closest]['posteroanterior (insertion projection)'].values[0]
+	inferosuperior = df_[df_['projection distance'].abs()==closest]['inferosuperior (insertion projection)'].values[0]
+	leftright = df_[df_['projection distance'].abs()==closest]['leftright (insertion projection)'].values[0]
 	t = df_[df_['projection distance'].abs()==closest]['projection t'].values[0]
 	references = df_['reference'].tolist()
 	# Select the most frequent reference:
@@ -124,12 +124,3 @@ def load_data(df,
 		df_referenced['leftright'] = 0
 
 	return df_referenced
-
-
-def design(data_file, target, angle,
-	):
-	df = load_data('~/data/stereotactic/skull_6465.csv')
-	ax = draw_anatomy()
-	implant(angle,target,df,ax,'orange','best')
-	plt.show()
-
