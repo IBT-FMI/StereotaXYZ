@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from matplotlib import rcParams
+from matplotlib import patches
 from os import path
 from stereotaxyz import skullsweep
 
@@ -156,7 +157,7 @@ def yz(df,
 	ax.set_xlabel('Posteroanterior({}) [mm]'.format(reference))
 	ax.set_ylabel('Inferosuperior({}) [mm]'.format(reference))
 
-	ax.set_title(u'{}° Insertion | Leftright({}) = {:.2f}mm'.format(
+	ax.set_title(u'{:.0f}° Insertion | Leftright({}) = {:.2f}mm'.format(
 		input_angle,
 		reference,
 		leftright,
@@ -168,13 +169,21 @@ def yz(df,
 
 def xyz(df,
 	target="",
+	yz_angle=0.,
+	xz_angle=0.,
 	incision=[],
 	axis_cut='x',
 	custom_style=False,
 	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
 	text_output=False,
-	projection_color='',
 	save_as='',
+	color_projection='',
+	color_skull='#AAAAAA',
+	color_incision='#FE2244',
+	color_target='#FE9911',
+	insertion_resolution=0.1,
+	skull_point_size=0.2,
+	marker_size=0.2,
 	):
 	"""Co-plot of skullsweep data points together with target and incision coordinates (as computed based on the skullsweep data and the angle of entry).
 
@@ -214,10 +223,6 @@ def xyz(df,
 
 	template = path.abspath(path.expanduser(template))
 
-	skull_df = df[df['tissue']=='skull']
-	skull_img = make_nii(skull_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=0.2)
-	skull_color = matplotlib.colors.ListedColormap(['#909090'], name='skull_color')
-
 	if target:
 		if type(target) is [tuple, list] and len(target) == 3:
 			x_target, y_target, z_target = target
@@ -245,14 +250,60 @@ def xyz(df,
 
 	incision_coords = [(x_incision, y_incision, z_incision)]
 
-	insertion_length = ((x_target-x_incision)**2+(y_target-y_incision)**2+(z_target-z_incision)**2)**(1/2)
+	# Start actual plotting:
+	if not custom_style:
+		plt.style.use(path.join(THIS_PATH,'stereotaxyz.conf'))
 
+	fig = plt.figure()
+	plt.axis('equal')
+	ax = plt.axes()
+
+	# Plot Anatomy
+	display = plot_anat(
+		anat_img='/home/chymera/ni_data/templates/DSURQEc_40micron_average.nii',
+		annotate=False,
+		display_mode=axis_cut,
+		draw_cross=False,
+		cut_coords=(0,),
+		axes=ax,
+		alpha=1.0,
+		)
+
+	# Calculate Screen-to-Anatomy resolution
+	bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+	width, height = bbox.width, bbox.height
+	width *= fig.dpi
+	height *= fig.dpi
+	template = nib.load(template)
+	template_x_resolution = template.shape[0]
+	template_x_affine = template.affine[0,0]
+	px_per_template_unit = abs(width/(template_x_resolution*template_x_affine))
+	adjusted_marker_size = marker_size * px_per_template_unit
+
+	# Create and Plot Skull Sweep Points
+	skull_df = df[df['tissue']=='skull']
+	skull_img = make_nii(skull_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=skull_point_size)
+	skull_color = matplotlib.colors.ListedColormap([color_skull], name='skull_color')
+	display.add_overlay(skull_img, cmap=skull_color)
+	skull_legend = plt.scatter([],[], marker="s", color=color_skull, label='Skull')
+
+	# Plot Target
+	if target:
+		display.add_markers(target_coords, marker_color=color_target, marker_size=adjusted_marker_size**1.8)
+		target_legend = plt.scatter([],[], marker="o", color=color_target, label='Target')
+
+	# Plot Incision
+	display.add_markers(incision_coords, marker_color=color_incision, marker_size=adjusted_marker_size**1.8, marker="D")
+	incision_legend = plt.scatter([],[], marker="D", color=color_incision, label="Incision [LR/PA/IS={:.2f}/{:.2f}/{:.2f}mm]".format(*incision_coords[0]))
+
+	# Create and Plot Inserion
+	insertion_length = ((x_incision-x_target)**2+(y_incision-y_target)**2+(z_incision-z_target)**2)**(1/2)
+	print(insertion_length)
 	x_increment = (x_incision-x_target)/float(insertion_length)
 	y_increment = (y_incision-y_target)/float(insertion_length)
 	z_increment = (z_incision-z_target)/float(insertion_length)
-
-	insertion_resolution = 100
-	insertion_t = np.linspace(0, insertion_length, insertion_resolution)
+	insertion_t_resolution = 100
+	insertion_t = np.linspace(0, insertion_length, insertion_t_resolution)
 	insertion_df = pd.DataFrame(
 			np.column_stack([
 				insertion_t*x_increment+x_target,
@@ -264,42 +315,27 @@ def xyz(df,
 				'posteroanterior',
 				'inferosuperior',
 				])
-	insertion_img = make_nii(insertion_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii')
-	insertion_color = matplotlib.colors.ListedColormap(['#909090'], name='insertion_color')
+	insertion_img = make_nii(insertion_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=insertion_resolution,)
+	display.add_contours(insertion_img)
+	print(insertion_length)
+	insertion_legend, = plt.plot([],[], color='#22FE11' ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
 
-	#return
-	if projection_color:
+	#Create and Plot Skull Sweep Projection Points
+	if color_projection:
 		skull_df_ = deepcopy(skull_df)
 		skull_df_['posteroanterior'] = skull_df_['posteroanterior (insertion projection)']
 		skull_df_['inferosuperior'] = skull_df_['inferosuperior (insertion projection)']
 		skull_df_['leftright'] = skull_df_['leftright (insertion projection)']
-		projection_img = make_nii(skull_df_, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=0.2)
-		projection_color = matplotlib.colors.ListedColormap([projection_color], name='projection_color')
-
-	# Start actual plotting:
-	if not custom_style:
-		try:
-			plt.style.use('stereotaxyz.conf')
-		except IOError:
-			pass
-	plt.figure()
-	plt.axis('equal')
-	ax = plt.axes()
-	display = plot_anat(
-		anat_img='/home/chymera/ni_data/templates/DSURQEc_40micron_average.nii',
-		display_mode=axis_cut,
-		draw_cross=False,
-		cut_coords=(0,),
-		axes=ax,
-		alpha=1.0,
-		)
-	display.add_overlay(skull_img, cmap=skull_color)
-	if target:
-		display.add_markers(target_coords, marker_color='#E5E520', marker_size=200)
-	display.add_markers(incision_coords, marker_color='#FFFFFF', marker_size=200)
-	display.add_contours(insertion_img)
-	if projection_color:
+		projection_img = make_nii(skull_df_, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=skull_point_size)
+		projection_color = matplotlib.colors.ListedColormap([color_projection], name='projection_color')
 		display.add_overlay(projection_img, cmap=projection_color)
+
+	# We create and place the legend.
+	# The positioning may be fragile
+	plt.legend(loc='lower right',bbox_to_anchor=(0.98, -0.2))
+	title_obj = plt.title(u'YZ/XY={:.0f}/{:.0f}° Insertion'.format(yz_angle,xz_angle))
+	plt.setp(title_obj, color='w') 
+
 	if save_as:
 		save_as = path.abspath(path.expanduser(save_as))
 		plt.savefig(save_as)
