@@ -8,4 +8,4 @@ df = skullsweep.load_data(data_file, ultimate_reference='bregma')
 
 increment, df = skullsweep.insert_by_angle('VTA', df, yz_angle=45.,)
 
-plotting.xyz(df, 'VTA', yz_angle=45., save_as='basic3d.png', insertion_resolution=0.05)
+plotting.xyz(df, 'VTA', yz_angle=45., save_as='basic3d.pdf', insertion_resolution=0.05)

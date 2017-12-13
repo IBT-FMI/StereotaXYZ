@@ -178,7 +178,7 @@ def xyz(df,
 	text_output=False,
 	save_as='',
 	color_projection='',
-	color_skull='#AAAAAA',
+	color_skull='#DDDDDD',
 	color_incision='#FE2244',
 	color_target='#FE9911',
 	insertion_resolution=0.1,
@@ -267,6 +267,8 @@ def xyz(df,
 		cut_coords=(0,),
 		axes=ax,
 		alpha=1.0,
+		dim=0,
+		black_bg=False,
 		)
 
 	# Calculate Screen-to-Anatomy resolution
@@ -330,9 +332,8 @@ def xyz(df,
 
 	# We create and place the legend.
 	# The positioning may be fragile
-	plt.legend(loc='lower right',bbox_to_anchor=(0.98, -0.2))
+	plt.legend(loc='lower right',bbox_to_anchor=(0.995, 0.005))
 	title_obj = plt.title(u'YZ/XY={:.0f}/{:.0f}° Insertion'.format(yz_angle,xz_angle))
-	plt.setp(title_obj, color='w') 
 
 	if save_as:
 		save_as = path.abspath(path.expanduser(save_as))
