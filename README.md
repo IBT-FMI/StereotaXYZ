@@ -8,14 +8,56 @@ In addition to implant design functionality, StereotaXYZ ships with a plotting u
 
 ## Examples
 
+The following examples assume that in addition to your preferred means of installation for StereotaXYZ, the example data from our repository is also available on your machine.
+You can make it available under the expected path of the examples, as follows:
+
+```
+cd
+mkdir src
+cd src
+git clone https://github.com/IBT-FMI/StereotaXYZ.git
+```
+
 ### 3D Auto-Sliced View with Anatomical Background
 Annotated and stylized `stereotaxyz.plotting.co_plot()` output. This exemplifies the StereotaXYZ concept, whereby the best site of entry and recommended insertable length is calculated (given a target, skull coordinates and desired angle of entry) and presented in a detailed anatomical overview.
 
-![Basic 3D](http://www.chymera.eu/img/examples/stereotaxyz/basic3d.png "Basic 3D")
+![Plot 3D](http://www.chymera.eu/img/examples/stereotaxyz/plot3d.png "Plot 3D")
 
 ### 2D Constant-X View with Clear Grid Background
 
-![Basic 2D](http://www.chymera.eu/img/examples/stereotaxyz/basic2d.png "Basic 2D")
+![Plot 2D](http://www.chymera.eu/img/examples/stereotaxyz/plot2d.png "Plot 2D")
+
+### Text Summary
+
+In case no visualization is needed, the computed coordinates for accessing a defined target at a defined angle can be outputted as text.
+From the command:
+
+```
+stereotaxyz text ~/src/stereotaxyz/example_data/skull_6465.csv DR -y 45
+```
+
+You can get the following output:
+
+```
+You have selected:
+
+	Target: “DR”
+		LeftRight(bregma): 		0.00
+		PosteroAnterior(bregma): 	-4.50
+		InferoSuperior(bregma): 	-3.15
+	Entry Angles:
+		XZ(from Posteroanterior axis): 	0°
+		YZ(from Posteroanterior axis): 	45°
+
+Given your skull points, you can best reach the target at the desired angle with:
+
+	Icision Site:
+		LeftRight(bregma): 		0.00
+		PosteroAnterior(bregma): 	-7.18
+		InferoSuperior(bregma): 	-0.47
+	Insertion Length: 3.79mm
+```
+
 
 ## Installation
 
