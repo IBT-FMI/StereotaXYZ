@@ -297,8 +297,7 @@ def xyz(df,
 	incision_legend = plt.scatter([],[], marker="D", color=color_incision, label="Incision [LR/PA/IS={:.2f}/{:.2f}/{:.2f}mm]".format(*incision_coords[0]))
 
 	# Create and Plot Inserion
-	insertion_length = ((x_incision-x_target)**2+(y_incision-y_target)**2+(z_incision-z_target)**2)**(1/2)
-	print(insertion_length)
+	insertion_length = ((x_incision-x_target)**2+(y_incision-y_target)**2+(z_incision-z_target)**2)**(1/2.)
 	x_increment = (x_incision-x_target)/float(insertion_length)
 	y_increment = (y_incision-y_target)/float(insertion_length)
 	z_increment = (z_incision-z_target)/float(insertion_length)
@@ -317,7 +316,6 @@ def xyz(df,
 				])
 	insertion_img = make_nii(insertion_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=insertion_resolution,)
 	display.add_contours(insertion_img)
-	print(insertion_length)
 	insertion_legend, = plt.plot([],[], color='#22FE11' ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
 
 	#Create and Plot Skull Sweep Projection Points
