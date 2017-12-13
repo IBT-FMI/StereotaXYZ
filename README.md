@@ -8,10 +8,14 @@ In addition to implant design functionality, StereotaXYZ ships with a plotting u
 
 ## Examples
 
-### Animal Imaging Center “Picture of the Month” (2017-12)
+### 3D Auto-Sliced View with Anatomical Background
 Annotated and stylized `stereotaxyz.plotting.co_plot()` output. This exemplifies the StereotaXYZ concept, whereby the best site of entry and recommended insertable length is calculated (given a target, skull coordinates and desired angle of entry) and presented in a detailed anatomical overview.
 
-![Co-Plot](http://www.chymera.eu/img/examples/stereotaxyz/concept.png "Co-Plot")
+![Basic 3D](http://www.chymera.eu/img/examples/stereotaxyz/basic3d.png "Basic 3D")
+
+### 2D Constant-X View with Clear Grid Background
+
+![Basic 2D](http://www.chymera.eu/img/examples/stereotaxyz/basic2d.png "Basic 2D")
 
 ## Installation
 

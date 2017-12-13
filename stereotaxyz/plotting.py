@@ -260,7 +260,7 @@ def xyz(df,
 
 	# Plot Anatomy
 	display = plot_anat(
-		anat_img='/home/chymera/ni_data/templates/DSURQEc_40micron_average.nii',
+		anat_img=template,
 		annotate=False,
 		display_mode=axis_cut,
 		draw_cross=False,
@@ -276,15 +276,15 @@ def xyz(df,
 	width, height = bbox.width, bbox.height
 	width *= fig.dpi
 	height *= fig.dpi
-	template = nib.load(template)
-	template_x_resolution = template.shape[0]
-	template_x_affine = template.affine[0,0]
+	template_img = nib.load(template)
+	template_x_resolution = template_img.shape[0]
+	template_x_affine = template_img.affine[0,0]
 	px_per_template_unit = abs(width/(template_x_resolution*template_x_affine))
 	adjusted_marker_size = marker_size * px_per_template_unit
 
 	# Create and Plot Skull Sweep Points
 	skull_df = df[df['tissue']=='skull']
-	skull_img = make_nii(skull_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=skull_point_size)
+	skull_img = make_nii(skull_df, template=template, resolution=skull_point_size)
 	skull_color = matplotlib.colors.ListedColormap([color_skull], name='skull_color')
 	display.add_overlay(skull_img, cmap=skull_color)
 	skull_legend = plt.scatter([],[], marker="s", color=color_skull, label='Skull')
@@ -316,7 +316,7 @@ def xyz(df,
 				'posteroanterior',
 				'inferosuperior',
 				])
-	insertion_img = make_nii(insertion_df, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=insertion_resolution,)
+	insertion_img = make_nii(insertion_df, template=template, resolution=insertion_resolution,)
 	display.add_contours(insertion_img)
 	insertion_legend, = plt.plot([],[], color='#22FE11' ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
 
@@ -349,15 +349,15 @@ def make_nii(df_slice,
 	template = nib.load(path.abspath(path.expanduser(template)))
 	affine = template.affine
 	affine_factor = [
-		int(round(np.abs(affine[0,0]/float(resolution)))),
-		int(round(np.abs(affine[1,1]/float(resolution)))),
-		int(round(np.abs(affine[2,2]/float(resolution)))),
+		np.abs(affine[0,0]/float(resolution)),
+		np.abs(affine[1,1]/float(resolution)),
+		np.abs(affine[2,2]/float(resolution)),
 		]
 	affine[0,0] = affine[1,1] = affine[2,2] = resolution
 	shape = [
-		int(template.shape[0]*affine_factor[0]),
-		int(template.shape[1]*affine_factor[1]),
-		int(template.shape[2]*affine_factor[2]),
+		int(round(template.shape[0]*affine_factor[0])),
+		int(round(template.shape[1]*affine_factor[1])),
+		int(round(template.shape[2]*affine_factor[2])),
 		]
 	data = np.zeros(shape=tuple(shape))
 	for ix, point in df_slice.iterrows():
