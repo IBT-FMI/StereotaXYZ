@@ -9,4 +9,4 @@ install:
 script: 
   - export MPLBACKEND="agg"
   - ./test_scripts.sh
-  - (cd stereotaxyz/examples && for f in *.py ; do python "$f" ; done)
+  - (cd stereotaxyz/examples && for f in *.py ; do python "$f" || exit 1 ; done)
