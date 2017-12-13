@@ -19,11 +19,31 @@ git clone https://github.com/IBT-FMI/StereotaXYZ.git
 ```
 
 ### 3D Auto-Sliced View with Anatomical Background
-Annotated and stylized `stereotaxyz.plotting.co_plot()` output. This exemplifies the StereotaXYZ concept, whereby the best site of entry and recommended insertable length is calculated (given a target, skull coordinates and desired angle of entry) and presented in a detailed anatomical overview.
+
+StereotaXYZ can produce volumetric data representations of all elements of interest, registered to the coordinate space of a template.
+Angles can be specified “in 3D” - meaning that the elements of interest are not constrained to a specific YZ or XZ plane.
+In this case YZ and XZ angles have to be specifically selected.
+
+A basic example of this plotting features (though all elements here lie in the same YZ plane) can be produced by:
+
+```
+stereotaxyz plot3d ~/src/stereotaxyz/example_data/skull_6465.csv DR -y 45 --save-as plot3d.png
+```
+
+And looks like the following image:
 
 ![Plot 3D](http://www.chymera.eu/img/examples/stereotaxyz/plot3d.png "Plot 3D")
 
 ### 2D Constant-X View with Clear Grid Background
+
+A simple 2D visualization of the elements of interest can be created with the `stereotaxyz plot2d` command line interface (internally calling the `stereotaxyz.plotting.yz()` function).
+A basic usage example of this function, is:
+
+```
+stereotaxyz plot2d ~/src/stereotaxyz/example_data/skull_6465.csv DR -a 45 --save-as plot2d.png
+```
+
+which produces the following feature:
 
 ![Plot 2D](http://www.chymera.eu/img/examples/stereotaxyz/plot2d.png "Plot 2D")
 
