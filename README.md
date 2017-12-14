@@ -6,7 +6,7 @@ This is particularly relevant when performing interventions at odd angles throug
 
 In addition to implant design functionality, StereotaXYZ ships with a plotting utility, which allows visual inspection of implant designs with.
 
-## Examples
+## Usage Examples
 
 The following examples assume that in addition to your preferred means of installation for StereotaXYZ, the example data from our repository is also available on your machine.
 You can make it available under the expected path of the examples, as follows:
@@ -78,22 +78,30 @@ Given your skull points, you can best reach the target at the desired angle with
 	Insertion Length: 3.79mm
 ```
 
+##Getting Started
+
+To use the sofware, after [installing it](#installation), you will need to:
+
+* Create a “Skullsweep” file analogous to the [example file](example_data/skull_6465.csv) distributed with the software.
+* Choose a reference point (most commonly bregma) for all your measurements; lambda can also be used as a reference, but them be sure to specify lambda's cordinates relative to bregma (as we do in the example file).
+* Fill in skullsweep point coordinates (best recorded by lowering a thin pipette or stylus until it makes contact with a properly restrained and positioned animal's skull).
+* Enter the coordinates for any targets you might want to use.
+* Run any of our [command line interfaces](#usage-examples), specifying the desired target and the desired angle of entry.
 
 ## Installation
 
-### Dependencies:
+### Gentoo Linux
+StereotaXYZ is distributed with a [.gentoo](.gentoo) specification installation instruction.
+If using a Gentoo system, you can simplky clone this overlay, and use the associated script to install the software, and automatically handle all of its dependencies.
+As root, run:
 
-To install the software you will need to have the following packages available on your system.
+````
+git clone git@github.com:IBT-FMI/StereotaXYZ.git
+cd StereotaXYZ/.gentoo
+./install.sh
+````
 
-* [argh](https://github.com/neithere/argh)
-* [Matplotlib](https://matplotlib.org/)
-* [NiBabel](http://nipy.org/nibabel/) (optional)
-* [NiLearn](http://nilearn.github.io/) (optional)
-* [NumPy](http://www.numpy.org/)
-* [pandas](http://pandas.pydata.org/)
-
-This is handled automatically if you install the software via a package manager (e.g. Gentoo's Portage) - if not, you will have to ensure that these packages are available manually.
-If you try to run the software without having the dependencies on your system, you will get `ImportError`s letting you know which package is missing.
+Non-live versons of this package will be available for Gentoo via the [Science Overlay](https://github.com/gentoo/sci) as they are released.
 
 ### Python Package Manager (Users)
 Python's `setuptools` allows you to install Python packages independently of your distribution (or operating system, even).
@@ -131,4 +139,19 @@ If you are getting a `Permission denied (publickey)` error upon trying to clone,
 
 * [Add an SSH key](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/) to your GitHub account.
 * Pull via the HTTPS link `git clone https://github.com/IBT-FMI/StereotaXYZ.git`.
+
+## Dependencies:
+
+To install the software you will need to have the following packages available on your system.
+
+* [argh](https://github.com/neithere/argh)
+* [Matplotlib](https://matplotlib.org/)
+* [NiBabel](http://nipy.org/nibabel/) (optional)
+* [NiLearn](http://nilearn.github.io/) (optional)
+* [NumPy](http://www.numpy.org/)
+* [pandas](http://pandas.pydata.org/)
+
+This is handled automatically if you install the software via a package manager (e.g. Gentoo's Portage) - if not, you will have to ensure that these packages are available manually.
+If you try to run the software without having the dependencies on your system, you will get `ImportError`s letting you know which package is missing.
+
 
