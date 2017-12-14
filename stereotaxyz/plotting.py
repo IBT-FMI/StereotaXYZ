@@ -8,7 +8,7 @@ import pandas as pd
 from copy import deepcopy
 from matplotlib import rcParams
 from matplotlib import patches
-from os import path
+from os import makedirs, path
 from stereotaxyz import skullsweep
 
 THIS_PATH = path.dirname(path.realpath(__file__))
@@ -223,10 +223,16 @@ def xyz(df,
 
 	template = path.abspath(path.expanduser(template))
 	if not path.isfile(template) and 'DSURQEc_40micron_average.nii' in template:
+		print('The template you have specified cannot be found on your system. '
+			'Luckily, we know where to get it from.\n'
+			'We are currently trying to download it '
+			'(this may take 2-3 minutes, but it only needs to be done once).')
 		ni_data_dir = path.abspath(path.expanduser('~/.ni_data'))
 		if not path.exists(ni_data_dir):
 			makedirs(ni_data_dir)
 		templates_dir = path.join(ni_data_dir,'templates')
+		if not path.exists(templates_dir):
+			makedirs(templates_dir)
 		import urllib
 		template = path.join(templates_dir,'DSURQEc_40micron_average.nii')
 		urllib.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
@@ -334,7 +340,7 @@ def xyz(df,
 		skull_df_['posteroanterior'] = skull_df_['posteroanterior (insertion projection)']
 		skull_df_['inferosuperior'] = skull_df_['inferosuperior (insertion projection)']
 		skull_df_['leftright'] = skull_df_['leftright (insertion projection)']
-		projection_img = make_nii(skull_df_, template='~/ni_data/templates/DSURQEc_200micron_average.nii', resolution=skull_point_size)
+		projection_img = make_nii(skull_df_, template=template, resolution=skull_point_size)
 		projection_color = matplotlib.colors.ListedColormap([color_projection], name='projection_color')
 		display.add_overlay(projection_img, cmap=projection_color)
 
@@ -348,7 +354,7 @@ def xyz(df,
 		plt.savefig(save_as)
 
 def make_nii(df_slice,
-	template='/home/chymera/ni_data/templates/DSURQEc_200micron_average.nii',
+	template='/home/chymera/ni_data/templates/DSURQEc_40micron_average.nii',
 	resolution=0.1,
 	):
 	"""Create a NIfTI based on a dataframe containing bregma-relative skullsweep points, and a bregma-origin template.
