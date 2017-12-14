@@ -1,7 +1,7 @@
 # StereotaXYZ
 [![Build Status](https://travis-ci.org/IBT-FMI/StereotaXYZ.svg?branch=master)](https://travis-ci.org/IBT-FMI/StereotaXYZ)
 
-StereotaXYZ - pronounced "stereo-tack-seas" - aids in the empirical design and in the per-animal customization of stereotactically targeted procedures.
+StereotaXYZ - pronounced "stereo-tack-seas" - aids in the empirical design and per-animal customization of stereotactically targeted procedures.
 This is particularly relevant when performing interventions at odd angles through high skull shape variability areas (e.g. the occipital or nasal bone plates) or areas which are difficult to access e.g. due to the proximity of tough or vital tissue.
 
 In addition to implant design functionality, StereotaXYZ ships with a plotting utility, which allows visual inspection of implant designs with.
@@ -81,6 +81,20 @@ Given your skull points, you can best reach the target at the desired angle with
 
 ## Installation
 
+### Dependencies:
+
+To install the software you will need to have the following packages available on your system.
+
+* [argh](https://github.com/neithere/argh)
+* [Matplotlib](https://matplotlib.org/)
+* [NiBabel](http://nipy.org/nibabel/) (optional)
+* [NiLearn](http://nilearn.github.io/) (optional)
+* [NumPy](http://www.numpy.org/)
+* [pandas](http://pandas.pydata.org/)
+
+This is handled automatically if you install the software via a package manager (e.g. Gentoo's Portage) - if not, you will have to ensure that these packages are available manually.
+If you try to run the software without having the dependencies on your system, you will get `ImportError`s letting you know which package is missing.
+
 ### Python Package Manager (Users)
 Python's `setuptools` allows you to install Python packages independently of your distribution (or operating system, even).
 This approach cannot manage any of our numerous non-Python dependencies (by design) and at the moment will not even manage Python dependencies;
@@ -118,9 +132,3 @@ If you are getting a `Permission denied (publickey)` error upon trying to clone,
 * [Add an SSH key](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/) to your GitHub account.
 * Pull via the HTTPS link `git clone https://github.com/IBT-FMI/StereotaXYZ.git`.
 
-## Dependencies:
-
-* [argh](https://github.com/neithere/argh) - in Portage as dev-python/argh
-* [Matplotlib](https://matplotlib.org/) - in Portage as dev-python/matplotlib
-* [NumPy](http://www.numpy.org/) - in Portage as dev-python/numpy
-* [pandas](http://pandas.pydata.org/) - in Portage as dev-python/pandas
