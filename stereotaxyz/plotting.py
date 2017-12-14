@@ -235,7 +235,11 @@ def xyz(df,
 			makedirs(templates_dir)
 		import urllib
 		template = path.join(templates_dir,'DSURQEc_40micron_average.nii')
-		urllib.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
+		# Python 3/2 compatibility
+		try:
+			urllib.request.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
+		except AttributeError:
+			urllib.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
 
 	if target:
 		if type(target) is [tuple, list] and len(target) == 3:

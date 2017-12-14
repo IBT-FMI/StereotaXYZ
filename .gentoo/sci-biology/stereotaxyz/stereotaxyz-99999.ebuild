@@ -37,6 +37,5 @@ python_test() {
 	for i in stereotaxyz/examples/*.py; do
 		"${PYTHON}" "$i" || die "Example Python script $i failed with ${EPYTHON}"
 	done
-	locale
 	./test_scripts.sh || die "Test scripts failed."
 }
