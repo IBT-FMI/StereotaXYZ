@@ -222,6 +222,14 @@ def xyz(df,
 		return False
 
 	template = path.abspath(path.expanduser(template))
+	if not path.isfile(template) and 'DSURQEc_40micron_average.nii' in template:
+		ni_data_dir = path.abspath(path.expanduser('~/.ni_data'))
+		if not path.exists(ni_data_dir):
+			makedirs(ni_data_dir)
+		templates_dir = path.join(ni_data_dir,'templates')
+		import urllib
+		template = path.join(templates_dir,'DSURQEc_40micron_average.nii')
+		urllib.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
 
 	if target:
 		if type(target) is [tuple, list] and len(target) == 3:
