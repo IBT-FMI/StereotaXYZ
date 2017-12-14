@@ -34,6 +34,7 @@ python_test() {
 	distutils_install_for_testing
 	export MPLBACKEND="agg"
 	export PATH=${TEST_DIR}/scripts:$PATH
+	export PYTHONIOENCODING=utf-8
 	for i in stereotaxyz/examples/*.py; do
 		"${PYTHON}" "$i" || die "Example Python script $i failed with ${EPYTHON}"
 	done
