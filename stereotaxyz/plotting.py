@@ -223,23 +223,24 @@ def xyz(df,
 
 	template = path.abspath(path.expanduser(template))
 	if not path.isfile(template) and 'DSURQEc_40micron_average.nii' in template:
-		print('The template you have specified cannot be found on your system. '
-			'Luckily, we know where to get it from.\n'
-			'We are currently trying to download it '
-			'(this may take 2-3 minutes, but it only needs to be done once).')
 		ni_data_dir = path.abspath(path.expanduser('~/.ni_data'))
-		if not path.exists(ni_data_dir):
-			makedirs(ni_data_dir)
 		templates_dir = path.join(ni_data_dir,'templates')
-		if not path.exists(templates_dir):
-			makedirs(templates_dir)
-		import urllib
 		template = path.join(templates_dir,'DSURQEc_40micron_average.nii')
-		# Python 3/2 compatibility
-		try:
-			urllib.request.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
-		except AttributeError:
-			urllib.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
+		if not path.isfile(template):
+			print('The template you have specified cannot be found on your system. '
+				'Luckily, we know where to get it from.\n'
+				'We are currently trying to download it '
+				'(this may take 2-3 minutes, but it only needs to be done once).')
+			if not path.exists(ni_data_dir):
+				makedirs(ni_data_dir)
+			if not path.exists(templates_dir):
+				makedirs(templates_dir)
+			import urllib
+			# Python 3/2 compatibility
+			try:
+				urllib.request.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
+			except AttributeError:
+				urllib.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
 
 	if target:
 		if type(target) is [tuple, list] and len(target) == 3:
