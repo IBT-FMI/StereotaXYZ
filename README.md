@@ -28,7 +28,7 @@ This full 3D-aware visualization can be obtained from the `stereotaxyz plot3d` c
 A basic usage example of this function is:
 
 ```
-stereotaxyz plot3d ~/src/stereotaxyz/example_data/skull_6465.csv DR -y 45 --save-as plot3d.png
+stereotaxyz plot3d ~/src/StereotaXYZ/example_data/skull_6465.csv DR -y 45 --save-as plot3d.png
 ```
 
 Which produces the following image (incidentally, all elements here lie in the same YZ-plane, but this is not required):
@@ -41,7 +41,7 @@ A simple 2D visualization of the elements of interest can be created with the `s
 A basic usage example of this function is :
 
 ```
-stereotaxyz plot2d ~/src/stereotaxyz/example_data/skull_6465.csv DR -a 45 --save-as plot2d.png
+stereotaxyz plot2d ~/src/StereotaXYZ/example_data/skull_6465.csv DR -a 45 --save-as plot2d.png
 ```
 
 Which produces the following image (here, all elements are required to lie in the same YZ-plane):
@@ -55,7 +55,7 @@ This is done via the `stereotaxyz text` command line interface.
 A basic usage example of this function is:
 
 ```
-stereotaxyz text ~/src/stereotaxyz/example_data/skull_6465.csv DR -y 45
+stereotaxyz text ~/src/StereotaXYZ/example_data/skull_6465.csv DR -y 45
 ```
 
 Which returns the following text to the terminal:
