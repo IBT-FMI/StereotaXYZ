@@ -197,7 +197,7 @@ def xyz(df,
 		The data should include columns named 'ID', 'posteroanterior', 'superoinferior', 'reference', and 'tissue'.
 	angle : float
 		Desired angle of entry.
-	axis_cut : {'x',}
+	axis_cut : {'x','yx'}
 		Perpendicularly to which axis the image should be cut for display.
 	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
@@ -278,17 +278,30 @@ def xyz(df,
 	ax = plt.axes()
 
 	# Plot Anatomy
-	display = plot_anat(
-		anat_img=template,
-		annotate=False,
-		display_mode=axis_cut,
-		draw_cross=False,
-		cut_coords=(0,),
-		axes=ax,
-		alpha=1.0,
-		dim=0,
-		black_bg=False,
-		)
+	if axis_cut == 'x':
+		display = plot_anat(
+			anat_img=template,
+			annotate=False,
+			display_mode=axis_cut,
+			draw_cross=False,
+			cut_coords=(target_coords[0][0],),
+			axes=ax,
+			alpha=1.0,
+			dim=0,
+			black_bg=False,
+			)
+	elif axis_cut == 'yx':
+		display = plot_anat(
+			anat_img=template,
+			annotate=False,
+			display_mode=axis_cut,
+			draw_cross=False,
+			cut_coords=(target_coords[0][0],target_coords[0][1]),
+			axes=ax,
+			alpha=1.0,
+			dim=0,
+			black_bg=False,
+			)
 
 	# Calculate Screen-to-Anatomy resolution
 	bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
@@ -401,7 +414,7 @@ def make_nii(df_slice,
 				z = -point['superoinferior']
 			except KeyError:
 				z = 0
-		new_x = (-x-affine[0,3])/affine[0,0]
+		new_x = (x-affine[0,3])/affine[0,0]
 		new_x = int(round(new_x))
 		new_y = (y-affine[1,3])/affine[1,1]
 		new_y = int(round(new_y))
