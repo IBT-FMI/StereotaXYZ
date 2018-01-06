@@ -195,10 +195,12 @@ def xyz(df,
 	skullsweep_data : str or pandas.DataFrame
 		Path to a CSV file or `pandas.DataFrame` object containing skullsweep and optionally target coordinates.
 		The data should include columns named 'ID', 'posteroanterior', 'superoinferior', 'reference', and 'tissue'.
-	angle : float
-		Desired angle of entry.
+	yz_angle : float
+		Desired angle of entry in the yz-plane (relative to the -z-axis).
+	xz_angle : float
+		Desired angle of entry in the xz-plane (relative to the -z-axis).
 	axis_cut : {'x','yx'}
-		Perpendicularly to which axis the image should be cut for display.
+		Specify the axes perpendicularly to which the image should be cut for display.
 	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
 	custom_style : bool

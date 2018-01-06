@@ -39,6 +39,7 @@ def plot2d(data, target,
 def plot3d(data, target,
 	yz_angle=0,
 	xz_angle=0,
+	view='x',
 	reference='bregma',
 	save_as='',
 	insertion_resolution=0.05,
@@ -49,6 +50,31 @@ def plot3d(data, target,
 	skull_point_size=0.2,
 	marker_size=0.2,
 	):
+	"""Load StereotaXYZ-formatted skullsweep data and co-plot skull points together with target, implant, and incision coordinates.
+
+	Parameters
+	----------
+
+	data : str
+		Path to a StereotaXYZ-formatted skullsweep file.
+	target : str or list or tuple
+		Target identifier. Can either be a string (identifying a row via the 'ID' column of the skullsweep_data DataFrame) or a list or tuple of exactly 3 floats giving the y (leftright), x (posteroanterior), and z (superoinferior) coordinates of the target, in this order.
+	skullsweep_data : str or pandas.DataFrame
+		Path to a CSV file or `pandas.DataFrame` object containing skullsweep and optionally target coordinates.
+		The data should include columns named 'ID', 'posteroanterior', 'superoinferior', 'reference', and 'tissue'.
+	yz_angle : float
+		Desired angle of entry in the yz-plane (relative to the -z-axis).
+	xz_angle : float
+		Desired angle of entry in the xz-plane (relative to the -z-axis).
+	view : {'x','yx'}
+		Specify the axes perpendicularly to which the image should be cut for display.
+	save_as : str
+		Path under which to save the output image.
+
+	Notes
+	-----
+	Some functions are imported in local scope to allow 2D plotting to function with minimal dependencies.
+	"""
 
 	data_file = path.abspath(path.expanduser(data))
 	df = skullsweep.load_data(data_file, ultimate_reference=reference)
@@ -58,6 +84,7 @@ def plot3d(data, target,
 	plotting.xyz(df, target,
 		xz_angle=xz_angle,
 		yz_angle=yz_angle,
+		axis_cut=view,
 		save_as=save_as,
 		color_projection=color_projection,
 		color_skull=color_skull,
