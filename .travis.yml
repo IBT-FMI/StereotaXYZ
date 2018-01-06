@@ -5,4 +5,4 @@ before_install:
   - docker start stereotaxyz
   - docker exec stereotaxyz emaint sync -a
 script:
-  - docker exec stereotaxyz sh -c 'FEATURES="-test" /home/stereotaxyz/.gentoo/install.sh'
+  - docker exec stereotaxyz sh -c 'FEATURES="test" /home/stereotaxyz/.gentoo/install.sh'
