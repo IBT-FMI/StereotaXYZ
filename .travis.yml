@@ -4,6 +4,5 @@ before_install:
   - docker create --name "stereotaxyz" --rm -ti -v "${PWD}":/home/stereotaxyz ibtfmi/stereotaxyz
   - docker start stereotaxyz
   - docker exec stereotaxyz emaint sync -a
-  - docker exec stereotaxyz /home/stereotaxyz/.gentoo/install.sh -o
-install:
+script:
   - docker exec stereotaxyz sh -c 'FEATURES="-test" /home/stereotaxyz/.gentoo/install.sh'
