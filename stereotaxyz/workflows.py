@@ -6,7 +6,7 @@ from stereotaxyz import plotting, skullsweep
 
 def plot2d(data, target,
 	angle=0,
-	reference='bregma',
+	internal_reference='bregma',
 	resolution=1000,
 	color_skull='gray',
 	color_target='orange',
@@ -15,10 +15,11 @@ def plot2d(data, target,
 	color_projection='',
 	insertion_axis=True,
 	save_as='',
+	reference='',
 	):
 
 	data_file = path.abspath(path.expanduser(data))
-	df = skullsweep.load_data(data_file, ultimate_reference=reference)
+	df = skullsweep.load_data(data_file, ultimate_reference=internal_reference)
 
 	increment, df = skullsweep.insert_by_angle(target, df, yz_angle=angle,)
 
@@ -32,6 +33,7 @@ def plot2d(data, target,
 		color_incision=color_incision,
 		color_projection=color_projection,
 		insertion_axis=insertion_axis,
+		reference=reference,
 		)
 	if not save_as:
 		plt.show()
@@ -40,7 +42,7 @@ def plot3d(data, target,
 	yz_angle=0,
 	xz_angle=0,
 	view='x',
-	reference='bregma',
+	internal_reference='bregma',
 	save_as='',
 	insertion_resolution=0.05,
 	color_projection='',
@@ -49,6 +51,7 @@ def plot3d(data, target,
 	color_target='#FE9911',
 	skull_point_size=0.2,
 	marker_size=0.2,
+	reference='',
 	):
 	"""Load StereotaXYZ-formatted skullsweep data and co-plot skull points together with target, implant, and incision coordinates.
 
@@ -70,6 +73,9 @@ def plot3d(data, target,
 		Specify the axes perpendicularly to which the image should be cut for display.
 	save_as : str
 		Path under which to save the output image.
+	reference : string, optional
+		Referenc epoint relative to which to compute the coordinate specifications displayed int the figure legend.
+		This value must be present once and only once on the 'ID' column of the dataframe passed to the `df` parameter.
 
 	Notes
 	-----
@@ -77,22 +83,24 @@ def plot3d(data, target,
 	"""
 
 	data_file = path.abspath(path.expanduser(data))
-	df = skullsweep.load_data(data_file, ultimate_reference=reference)
+	df = skullsweep.load_data(data_file, ultimate_reference=internal_reference)
 
 	increment, df = skullsweep.insert_by_angle(target, df, yz_angle=yz_angle,)
 
-	plotting.xyz(df, target,
-		xz_angle=xz_angle,
-		yz_angle=yz_angle,
+	plotting.xyz(df,
 		axis_cut=view,
-		save_as=save_as,
 		color_projection=color_projection,
 		color_skull=color_skull,
 		color_incision=color_incision,
 		color_target=color_target,
 		insertion_resolution=insertion_resolution,
-		skull_point_size=skull_point_size,
 		marker_size=marker_size,
+		reference=reference,
+		save_as=save_as,
+		skull_point_size=skull_point_size,
+		target=target,
+		xz_angle=xz_angle,
+		yz_angle=yz_angle,
 		)
 	if not save_as:
 		plt.show()
@@ -100,21 +108,46 @@ def plot3d(data, target,
 def text(data, target,
 	yz_angle=0,
 	xz_angle=0,
-	reference='bregma',
+	internal_reference='bregma',
+	reference='',
 	):
+	"""Return a text summary of the user-specified constraints for insertion and the computed best insertion length and incision site.
+
+	Parameters
+	----------
+
+	data : str
+		Path to a StereotaXYZ-formatted skullsweep file.
+	reference : string, optional
+		Referenc epoint relative to which to compute the coordinate specifications displayed int the figure legend.
+		This value must be present once and only once on the 'ID' column of the dataframe passed to the `df` parameter.
+	"""
+
+
+	if not reference:
+		reference = internal_reference
 
 	data_file = path.abspath(path.expanduser(data))
-	df = skullsweep.load_data(data_file, ultimate_reference=reference)
+	df = skullsweep.load_data(data_file, ultimate_reference=internal_reference)
 
 	increment, df = skullsweep.insert_by_angle(target, df, yz_angle=yz_angle, xz_angle=xz_angle)
 
-	x_target = df[df['ID']==target]['leftright'].item()
-	y_target = df[df['ID']==target]['posteroanterior'].item()
-	z_target = df[df['ID']==target]['inferosuperior'].item()
+	if reference != internal_reference:
+		x_reference = df[df['ID']==reference]['leftright'].item()
+		y_reference = df[df['ID']==reference]['posteroanterior'].item()
+		z_reference = df[df['ID']==reference]['inferosuperior'].item()
+	else:
+		x_reference = 0
+		y_reference = 0
+		z_reference = 0
 
-	x_incision = df[df['ID']=='incision']['leftright'].item()
-	y_incision = df[df['ID']=='incision']['posteroanterior'].item()
-	z_incision = df[df['ID']=='incision']['inferosuperior'].item()
+	x_target = df[df['ID']==target]['leftright'].item() - x_reference
+	y_target = df[df['ID']==target]['posteroanterior'].item() - y_reference
+	z_target = df[df['ID']==target]['inferosuperior'].item() - z_reference
+
+	x_incision = df[df['ID']=='incision']['leftright'].item() - x_reference
+	y_incision = df[df['ID']=='incision']['posteroanterior'].item() - y_reference
+	z_incision = df[df['ID']=='incision']['inferosuperior'].item() - z_reference
 
 	insertion_length = ((x_incision-x_target)**2+(y_incision-y_target)**2+(z_incision-z_target)**2)**(1/2.)
 	print('You have selected:\n')

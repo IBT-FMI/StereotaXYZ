@@ -26,7 +26,8 @@ def yz(df,
 	color_projection='',
 	custom_style=False,
 	insertion_axis=True,
-	save_as = '',
+	save_as='',
+	reference='',
 	):
 	"""Create a 2D plot (along the YZ plane) containing structures of interest recorded in a StereotaXYZ-style (e.g. `stereotaxyz.skullsweep`-outputted) DataFrame.
 
@@ -66,12 +67,42 @@ def yz(df,
 		Whether to plot the insertion axis.
 	save_as : str
 		Path under which to save the output image.
+	reference : string, optional
+		Referenc epoint relative to which to compute the coordinate specifications displayed int the figure legend.
+		This value must be present once and only once on the 'ID' column of the dataframe passed to the `df` parameter.
 	"""
 
+	# Set References
+	internal_references = df['reference'].unique()
+	internal_reference = internal_references[0]
+	if len(internal_references) > 1:
+		print(
+			'WARNING: The DataFrame you have passed to `stereotaxyz.plotting.yz()` contains rows referenced to multiple values, namely: "{}". '
+			'We will assume that all values are referenced to {}. '
+			'This means that some of the computations and/or the reference specification for the output may be wrong. '
+			.format(references, reference)
+		)
+
+	if not reference:
+		reference = internal_reference
+
+	if reference != internal_reference:
+		x_reference = df[df['ID']==reference]['posteroanterior'].item()
+		y_reference = df[df['ID']==reference]['inferosuperior'].item()
+	else:
+		x_reference = 0
+		y_reference = 0
+
+	# Check LeftRight integrity
 	leftrights = df['leftright'].unique()
 	leftright = leftrights[0]
 	if len(leftrights) > 1:
-		print('WARNING: The DataFrame you have passed to `stereotaxyz.plotting.yz()` contains multiple leftright axis specifications, namely: "{}". We will assume that all values are aligned leftright at {}mm. This means that some of the computations and/or the leftright specification for the output may be wrong.'.format(leftrights, leftright))
+		print(
+			'WARNING: The DataFrame you have passed to `stereotaxyz.plotting.yz()` contains multiple leftright axis specifications, namely: "{}". '
+			'We will assume that all values are aligned leftright at {}mm. '
+			'This means that some of the computations and/or the leftright specification for the output may be wrong.'
+			.format(leftrights, leftright)
+		)
 
 	# Start actual plotting:
 	if not custom_style:
@@ -134,7 +165,13 @@ def yz(df,
 	if (x_incision and y_incision) and color_incision:
 		incision_plot = ax.scatter(x_incision, y_incision, color=color_incision, marker='D')
 		legend_handles.append(incision_plot)
-		legend_names.append("Incision [PA/IS={:.2f}/{:.2f}mm]".format(x_incision, y_incision))
+		if reference != internal_reference:
+			legend_names.append("Incision [PA/IS={:.2f}/{:.2f}mm]\n\t(relative to {})"
+				.format(x_incision-x_reference, y_incision-y_reference, reference)
+				.expandtabs()
+			)
+		else:
+			legend_names.append("Incision [PA/IS={:.2f}/{:.2f}mm]".format(x_incision-x_reference, y_incision-y_reference))
 	if (x_incision and y_incision) and target and color_insertion:
 		insertion_plot, = ax.plot([x_incision, x_offset],[y_incision,y_offset],  color=color_insertion, linewidth=rcParams['lines.linewidth']*2.)
 		legend_handles.append(insertion_plot)
@@ -149,17 +186,13 @@ def yz(df,
 		pass
 	legend = ax.legend(legend_handles, legend_names)
 
-	references = df['reference'].unique()
-	reference = references[0]
-	if len(references) > 1:
-		print('WARNING: The DataFrame you have passed to `stereotaxyz.plotting.yz()` contains rows referenced to multiple values, namely: "{}". We will assume that all values are referenced to {}. This means that some of the computations and/or the reference specification for the output may be wrong.'.format(references, reference))
 
-	ax.set_xlabel('Posteroanterior({}) [mm]'.format(reference))
-	ax.set_ylabel('Inferosuperior({}) [mm]'.format(reference))
+	ax.set_xlabel('Posteroanterior({}) [mm]'.format(internal_reference))
+	ax.set_ylabel('Inferosuperior({}) [mm]'.format(internal_reference))
 
 	ax.set_title(u'{:.0f}° Insertion | Leftright({}) = {:.2f}mm'.format(
 		input_angle,
-		reference,
+		internal_reference,
 		leftright,
 		))
 
@@ -168,49 +201,55 @@ def yz(df,
 		plt.savefig(save_as)
 
 def xyz(df,
-	target="",
-	yz_angle=0.,
-	xz_angle=0.,
-	incision=[],
 	axis_cut='x',
-	custom_style=False,
-	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
-	text_output=False,
-	save_as='',
 	color_projection='',
 	color_skull='#DDDDDD',
 	color_incision='#FE2244',
 	color_target='#FE9911',
+	custom_style=False,
+	incision=[],
 	insertion_resolution=0.1,
-	skull_point_size=0.2,
 	marker_size=0.2,
+	reference='',
+	save_as='',
+	skull_point_size=0.2,
+	target="",
+	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
+	text_output=False,
+	xz_angle=0.,
+	yz_angle=0.,
 	):
 	"""Co-plot of skullsweep data points together with target and incision coordinates (as computed based on the skullsweep data and the angle of entry).
 
 	Parameters
 	----------
 
-	target : str or list or tuple
-		Target identifier. Can either be a string (identifying a row via the 'ID' column of the skullsweep_data DataFrame) or a list or tuple of exactly 3 floats giving the y (leftright), x (posteroanterior), and z (superoinferior) coordinates of the target, in this order.
+	df : pandas.DataFrame
+		StereotaXYZ-style `pandas.DataFrame` object, best obtained from `stereotaxyz.skulsweep.load_data()`.
+	axis_cut : {'x','yx'}
+		Specify the axes perpendicularly to which the image should be cut for display.
+	custom_style : bool
+		Whether to forego the application of a default style.
+	incision : dict or list, optional
+		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
+	reference : string, optional
+		Referenc epoint relative to which to compute the coordinate specifications displayed int the figure legend.
+		This value must be present once and only once on the 'ID' column of the dataframe passed to the `df` parameter.
+	save_as : str
+		Path under which to save the output image.
 	skullsweep_data : str or pandas.DataFrame
 		Path to a CSV file or `pandas.DataFrame` object containing skullsweep and optionally target coordinates.
 		The data should include columns named 'ID', 'posteroanterior', 'superoinferior', 'reference', and 'tissue'.
-	yz_angle : float
-		Desired angle of entry in the yz-plane (relative to the -z-axis).
-	xz_angle : float
-		Desired angle of entry in the xz-plane (relative to the -z-axis).
-	axis_cut : {'x','yx'}
-		Specify the axes perpendicularly to which the image should be cut for display.
-	incision : dict or list, optional
-		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
-	custom_style : bool
-		Whether to forego the application of a default style.
+	target : str or list or tuple
+		Target identifier. Can either be a string (identifying a row via the 'ID' column of the skullsweep_data DataFrame) or a list or tuple of exactly 3 floats giving the y (leftright), x (posteroanterior), and z (superoinferior) coordinates of the target, in this order.
 	template : str
 		Path to template (generally an anatomical image) to be used as background.
 	text_output : bool
 		Whether to print relevant output (computed enrty point coordinates and recommended insertion length) to the command line.
-	save_as : str
-		Path under which to save the output image.
+	xz_angle : float
+		Desired angle of entry in the xz-plane (relative to the -z-axis).
+	yz_angle : float
+		Desired angle of entry in the yz-plane (relative to the -z-axis).
 
 	Notes
 	-----
@@ -220,8 +259,33 @@ def xyz(df,
 	try:
 		from nilearn.plotting import plot_anat
 	except ImportError:
-		print('You seem to be lacking “nilearn”, a module which we require for 3D plotting on top of a reference image - or one of its dependencies. Please make this package and its full dependency stack available, or use our background-less 2D plotting functionality instead.')
+		print(
+			'You seem to be lacking “nilearn”, a module which we require for 3D plotting on top of a reference image - or one of its dependencies. '
+			'Please make this package and its full dependency stack available, or use our background-less 2D plotting functionality instead.'
+		)
 		return False
+
+	# Set References
+	internal_references = df['reference'].unique()
+	internal_reference = internal_references[0]
+	if len(internal_references) > 1:
+		print(
+			'WARNING: The DataFrame you have passed to `stereotaxyz.plotting.yz()` contains rows referenced to multiple values, namely: "{}". '
+			'We will assume that all values are referenced to {}. '
+			'This means that some of the computations and/or the reference specification for the output may be wrong. '
+			.format(references, reference)
+		)
+	if not reference:
+		reference = internal_reference
+
+	if reference != internal_reference:
+		x_reference = df[df['ID']==reference]['leftright'].item()
+		y_reference = df[df['ID']==reference]['posteroanterior'].item()
+		z_reference = df[df['ID']==reference]['inferosuperior'].item()
+	else:
+		x_reference = 0
+		y_reference = 0
+		z_reference = 0
 
 	template = path.abspath(path.expanduser(template))
 	if not path.isfile(template) and 'DSURQEc_40micron_average.nii' in template:
@@ -330,7 +394,17 @@ def xyz(df,
 
 	# Plot Incision
 	display.add_markers(incision_coords, marker_color=color_incision, marker_size=adjusted_marker_size**1.8, marker="D")
-	incision_legend = plt.scatter([],[], marker="D", color=color_incision, label="Incision [LR/PA/IS={:.2f}/{:.2f}/{:.2f}mm]".format(*incision_coords[0]))
+	if reference != internal_reference:
+		format_list = incision_coords[0]
+		format_list = np.subtract(format_list, (x_reference, y_reference, z_reference))
+		format_list = list(format_list)
+		format_list.append(reference)
+		incision_legend = plt.scatter([],[], marker="D", color=color_incision, label="Incision [LR/PA/IS={:.2f}/{:.2f}/{:.2f}mm]\n\t(relative to {})"
+			.format(*format_list)
+			.expandtabs()
+			)
+	else:
+		incision_legend = plt.scatter([],[], marker="D", color=color_incision, label="Incision [LR/PA/IS={:.2f}/{:.2f}/{:.2f}mm]".format(*incision_coords[0]))
 
 	# Create and Plot Inserion
 	insertion_length = ((x_incision-x_target)**2+(y_incision-y_target)**2+(z_incision-z_target)**2)**(1/2.)

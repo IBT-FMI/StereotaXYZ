@@ -7,4 +7,4 @@ data_file = path.join(data_dir,'skull_6465_offset.csv')
 df = skullsweep.load_data(data_file, ultimate_reference='bregma')
 
 increment, df = skullsweep.insert_by_angle('VTA', df, yz_angle=45.,)
-plotting.xyz(df, 'VTA', yz_angle=45., save_as='basic3d_offset.pdf', insertion_resolution=0.05)
+plotting.xyz(df, target='VTA', yz_angle=45., save_as='basic3d_offset.pdf', insertion_resolution=0.05)

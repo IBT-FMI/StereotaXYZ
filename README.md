@@ -28,12 +28,12 @@ This full 3D-aware visualization can be obtained from the `stereotaxyz plot3d` c
 A basic usage example of this function is:
 
 ```
-stereotaxyz plot3d ~/src/StereotaXYZ/example_data/skull_6465.csv DR -y 45 --save-as plot3d.png
+stereotaxyz plot3d ~/src/StereotaXYZ/example_data/skull_6469.csv DR -y 45 --reference "bregma skull" --save-as 6469_3d.png
 ```
 
 Which produces the following image (incidentally, all elements here lie in the same YZ-plane, but this is not required):
 
-![Plot 3D](http://www.chymera.eu/img/examples/stereotaxyz/plot3d.png "Plot 3D")
+![Plot 3D](http://www.chymera.eu/img/examples/stereotaxyz/6469_3d.png "Plot 3D")
 
 ### 2D (Constant-X) View with Clear Grid Background
 
@@ -41,12 +41,12 @@ A simple 2D visualization of the elements of interest can be created with the `s
 A basic usage example of this function is :
 
 ```
-stereotaxyz plot2d ~/src/StereotaXYZ/example_data/skull_6465.csv DR -a 45 --save-as plot2d.png
+stereotaxyz plot2d ~/src/StereotaXYZ/example_data/skull_6465.csv DR -a 45 --save-as 6465_2d.png
 ```
 
 Which produces the following image (here, all elements are required to lie in the same YZ-plane):
 
-![Plot 2D](http://www.chymera.eu/img/examples/stereotaxyz/plot2d.png "Plot 2D")
+![Plot 2D](http://www.chymera.eu/img/examples/stereotaxyz/6465_2d.png "Plot 2D")
 
 ### Text Summary
 
@@ -55,7 +55,7 @@ This is done via the `stereotaxyz text` command line interface.
 A basic usage example of this function is:
 
 ```
-stereotaxyz text ~/src/StereotaXYZ/example_data/skull_6465.csv DR -y 45
+stereotaxyz text ~/src/stereotaxyz/example_data/skull_6469.csv DR -y 45 --reference "lambda skull"
 ```
 
 Which returns the following text to the terminal:
@@ -63,10 +63,10 @@ Which returns the following text to the terminal:
 ```
 You have selected:
 
-	Target: “DR”
-		LeftRight(bregma): 		0.00
-		PosteroAnterior(bregma): 	-4.50
-		InferoSuperior(bregma): 	-3.15
+	Target: "DR"
+		LeftRight(lambda skull): 		0.00
+		PosteroAnterior(lambda skull): 	-0.60
+		InferoSuperior(lambda skull): 	-3.40
 	Entry Angles:
 		XZ(from Posteroanterior axis): 	0°
 		YZ(from Posteroanterior axis): 	45°
@@ -74,10 +74,10 @@ You have selected:
 Given your skull points, you can best reach the target at the desired angle with:
 
 	Icision Site:
-		LeftRight(bregma): 		0.00
-		PosteroAnterior(bregma): 	-7.18
-		InferoSuperior(bregma): 	-0.47
-	Insertion Length: 3.79mm
+		LeftRight(lambda skull): 		0.00
+		PosteroAnterior(lambda skull): 	-3.15
+		InferoSuperior(lambda skull): 	-0.85
+	Insertion Length: 3.61mm
 ```
 
 ##Getting Started
