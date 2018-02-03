@@ -60,12 +60,13 @@ PHASES = {
 
 
 def mri_anatomy(anatomy,
-	template="~/ni_data/template/DSURQEc_40micron_average.nii",
+	template="~/ni_data/templates/DSURQEc_40micron_average.nii",
 	verbose=False,
 	phases=['rigid','affine'],
 	phase_dictionary = PHASES,
 	mask='',
 	num_threads=N_PROCS,
+	out_file='',
 	):
 
 	anatomy = os.path.abspath(os.path.expanduser(anatomy))
@@ -81,14 +82,18 @@ def mri_anatomy(anatomy,
 	hasher.update(buf)
 	registration_dir = hasher.hexdigest()[:16]
 
-	registration_path = '/tmp/stereotaxyz/{}'.format(registration_dir)
+	workdir = '/tmp/stereotaxyz/{}'.format(registration_dir)
 	try:
-		os.makedirs(registration_path)
+		os.makedirs(workdir)
 	except OSError:
-		if os.path.isdir(registration_path):
+		if os.path.isdir(workdir):
 			pass
 		else:
 			raise
+	if out_file:
+		out_file = os.path.abspath(os.path.expanduser(out_file))
+	else:
+		out_file = '{}/res.nii.gz'.format(workdir)
 
 	biascorrect = ants.N4BiasFieldCorrection()
 	biascorrect.inputs.bspline_fitting_distance = 10
@@ -97,7 +102,7 @@ def mri_anatomy(anatomy,
 	biascorrect.inputs.input_image = anatomy
 	biascorrect.inputs.n_iterations = [150,100,50,30]
 	biascorrect.inputs.convergence_threshold = 1e-11
-	biascorrect.inputs.output_image = '{}/n4.nii.gz'.format(registration_path)
+	biascorrect.inputs.output_image = '{}/n4.nii.gz'.format(workdir)
 	biascorrect.inputs.shrink_factor = 2
 	biascorrect.inputs.num_threads = num_threads
 	if verbose:
@@ -107,9 +112,9 @@ def mri_anatomy(anatomy,
 
 	parameters = [phase_dictionary[phase] for phase in phases]
 
-	registration = pe.Node(ants.Registration(), name="s_register")
+	registration = ants.Registration()
 	registration.inputs.fixed_image = template
-	registration.inputs.moving_image = biascorrect_res.outputs.out_file
+	registration.inputs.moving_image = biascorrect_res.outputs.output_image
 	registration.inputs.output_transform_prefix = "output_"
 	registration.inputs.transforms = [i["transforms"] for i in parameters] ##
 	registration.inputs.transform_parameters = [i["transform_parameters"] for i in parameters] ##
@@ -136,6 +141,6 @@ def mri_anatomy(anatomy,
 	if mask:
 		registration.inputs.fixed_image_masks = [mask]
 	registration.inputs.num_threads = num_threads
-	registration.inputs.output_warped_image = '{}/res.nii.gz'.format(registration_path)
+	registration.inputs.output_warped_image = out_file
 	registration_res = registration.run()
 
