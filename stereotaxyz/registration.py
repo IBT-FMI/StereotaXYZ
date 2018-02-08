@@ -8,30 +8,30 @@ PHASES = {
 	"rigid":{
 		"transforms":"Rigid",
 		"transform_parameters":(0.1,),
-		"number_of_iterations":[6000,3000],
+		"number_of_iterations":[1500,500],
 		"metric":"GC",
 		"metric_weight":1,
 		"radius_or_number_of_bins":64,
 		"sampling_strategy":"Regular",
 		"sampling_percentage":0.2,
-		"convergence_threshold":1.e-16,
+		"convergence_threshold":1.e-11,
 		"convergence_window_size":30,
 		"smoothing_sigmas":[1,0],
 		"sigma_units":"vox",
-		"shrink_factors":[2,1],
+		"shrink_factors":[3,1],
 		"use_estimate_learning_rate_once":False,
 		"use_histogram_matching":True,
 		},
 	"affine":{
 		"transforms":"Affine",
 		"transform_parameters":(0.1,),
-		"number_of_iterations":[500,250],
+		"number_of_iterations":[300,150],
 		"metric":"MI",
 		"metric_weight":1,
 		"radius_or_number_of_bins":8,
 		"sampling_strategy":None,
 		"sampling_percentage":0.3,
-		"convergence_threshold":1.e-32,
+		"convergence_threshold":1.e-11,
 		"convergence_window_size":30,
 		"smoothing_sigmas":[1,0],
 		"sigma_units":"vox",
@@ -100,8 +100,8 @@ def mri_anatomy(anatomy,
 	biascorrect.inputs.bspline_order = 10
 	biascorrect.inputs.dimension = 3
 	biascorrect.inputs.input_image = anatomy
-	biascorrect.inputs.n_iterations = [150,100,50,30]
-	biascorrect.inputs.convergence_threshold = 1e-11
+	biascorrect.inputs.n_iterations = [100,50,25,12]
+	biascorrect.inputs.convergence_threshold = 1e-10
 	biascorrect.inputs.output_image = '{}/n4.nii.gz'.format(workdir)
 	biascorrect.inputs.shrink_factor = 2
 	biascorrect.inputs.num_threads = num_threads
@@ -142,5 +142,8 @@ def mri_anatomy(anatomy,
 		registration.inputs.fixed_image_masks = [mask]
 	registration.inputs.num_threads = num_threads
 	registration.inputs.output_warped_image = out_file
+	if verbose:
+		registration.inputs.terminal_output = 'stream'
+		print('Running:\n{}'.format(registration.cmdline))
 	registration_res = registration.run()
 
