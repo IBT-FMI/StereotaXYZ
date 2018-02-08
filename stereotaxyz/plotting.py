@@ -424,7 +424,7 @@ def xyz(df,
 				'posteroanterior',
 				'inferosuperior',
 				])
-	insertion_img = make_nii(insertion_df, template=template, resolution=insertion_resolution,)
+	insertion_img = make_nii(insertion_df, template=template, resolution=insertion_resolution, target_coords=target_coords)
 	display.add_contours(insertion_img)
 	insertion_legend, = plt.plot([],[], color='#22FE11' ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
 
@@ -450,7 +450,7 @@ def xyz(df,
 def make_nii(df_slice,
 	template='/home/chymera/ni_data/templates/DSURQEc_40micron_average.nii',
 	resolution=0.1,
-	):
+	target_coords=False):
 	"""Create a NIfTI based on a dataframe containing bregma-relative skullsweep points, and a bregma-origin template.
 	"""
 
@@ -496,9 +496,16 @@ def make_nii(df_slice,
 		new_y = int(round(new_y))
 		new_z = (z-affine[2,3])/affine[2,2]
 		new_z = int(round(new_z))
-		data[new_x,new_y,new_z] = 1
+		# Awkward hack to get around nileaarn issue 1605:
+		# https://github.com/nilearn/nilearn/issues/1605
+		if target_coords:
+			if y != target_coords[0][1]:
+				data[new_x,new_y,new_z] = 1
+		else:
+			data[new_x,new_y,new_z] = 1
 
 	new_image = nib.Nifti1Image(data, affine=affine)
+	nib.save(new_image, '/home/chymera/lla.nii.gz')
 	return new_image
 
 
