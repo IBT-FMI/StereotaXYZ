@@ -78,7 +78,7 @@ def mri_anatomy(anatomy,
 	hasher = hashlib.sha256()
 	blocksize = hasher.block_size
 	anatomy_file = open(anatomy, "rb")
-	buf = anatomy_file.read(blocksize)
+	buf = anatomy_file.read(blocksize*20)
 	hasher.update(buf)
 	registration_dir = hasher.hexdigest()[:16]
 
