@@ -203,8 +203,9 @@ def yz(df,
 def xyz(df,
 	axis_cut='x',
 	color_projection='',
-	color_skull='#DDDDDD',
+	color_skull='#E0E0E0',
 	color_incision='#FE2244',
+	color_insertion='#22FE11',
 	color_target='#FE9911',
 	custom_style=False,
 	incision=[],
@@ -425,8 +426,9 @@ def xyz(df,
 				'inferosuperior',
 				])
 	insertion_img = make_nii(insertion_df, template=template, resolution=insertion_resolution, target_coords=target_coords)
-	display.add_contours(insertion_img)
-	insertion_legend, = plt.plot([],[], color='#22FE11' ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
+	insertion_color = matplotlib.colors.ListedColormap([color_insertion], name='insertion_color')
+	display.add_overlay(insertion_img, cmap=insertion_color)
+	insertion_legend, = plt.plot([],[], color=color_insertion ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
 
 	#Create and Plot Skull Sweep Projection Points
 	if color_projection:
