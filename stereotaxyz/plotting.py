@@ -383,7 +383,7 @@ def xyz(df,
 
 	# Create and Plot Skull Sweep Points
 	skull_df = df[df['tissue']=='skull']
-	skull_img = make_nii(skull_df, template=template, resolution=skull_point_size)
+	skull_img = make_nii(skull_df, template=template, resolution=skull_point_size, target_coords=target_coords)
 	skull_color = matplotlib.colors.ListedColormap([color_skull], name='skull_color')
 	display.add_overlay(skull_img, cmap=skull_color)
 	skull_legend = plt.scatter([],[], marker="s", color=color_skull, label='Skull')
@@ -501,7 +501,7 @@ def make_nii(df_slice,
 		# Awkward hack to get around nileaarn issue 1605:
 		# https://github.com/nilearn/nilearn/issues/1605
 		if target_coords:
-			if y != target_coords[0][1]:
+			if not target_coords[0][1]*1.05 <= y <= target_coords[0][1]*0.95:
 				data[new_x,new_y,new_z] = 1
 		else:
 			data[new_x,new_y,new_z] = 1
