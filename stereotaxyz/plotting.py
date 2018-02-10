@@ -210,6 +210,7 @@ def xyz(df,
 	custom_style=False,
 	incision=[],
 	insertion_resolution=0.1,
+	figure_title=u'YZ/XY={:.0f}/{:.0f}° Insertion',
 	marker_size=0.2,
 	reference='',
 	save_as='',
@@ -231,6 +232,9 @@ def xyz(df,
 		Specify the axes perpendicularly to which the image should be cut for display.
 	custom_style : bool
 		Whether to forego the application of a default style.
+	figure_title : string, optional
+		Title to be  applied to the figure.
+		Substitution characters, e.g. `{0}` and `{1}` will be formatted with the yz and xz angle values respectively.
 	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
 	reference : string, optional
@@ -443,7 +447,7 @@ def xyz(df,
 	# We create and place the legend.
 	# The positioning may be fragile
 	plt.legend(loc='lower right',bbox_to_anchor=(0.995, 0.005))
-	title_obj = plt.title(u'YZ/XY={:.0f}/{:.0f}° Insertion'.format(yz_angle,xz_angle))
+	plt.suptitle(figure_title.format(yz_angle,xz_angle), y=0.9)
 
 	if save_as:
 		save_as = path.abspath(path.expanduser(save_as))
