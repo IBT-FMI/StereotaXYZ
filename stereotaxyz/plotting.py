@@ -511,7 +511,6 @@ def make_nii(df_slice,
 			data[new_x,new_y,new_z] = 1
 
 	new_image = nib.Nifti1Image(data, affine=affine)
-	nib.save(new_image, '/home/chymera/lla.nii.gz')
 	return new_image
 
 
