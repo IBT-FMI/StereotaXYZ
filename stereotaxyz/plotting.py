@@ -203,12 +203,14 @@ def yz(df,
 def xyz(df,
 	axis_cut='x',
 	color_projection='',
-	color_skull='#DDDDDD',
+	color_skull='#E0E0E0',
 	color_incision='#FE2244',
+	color_insertion='#22FE11',
 	color_target='#FE9911',
 	custom_style=False,
 	incision=[],
 	insertion_resolution=0.1,
+	figure_title=u'YZ/XY={:.0f}/{:.0f}° Insertion',
 	marker_size=0.2,
 	reference='',
 	save_as='',
@@ -230,6 +232,9 @@ def xyz(df,
 		Specify the axes perpendicularly to which the image should be cut for display.
 	custom_style : bool
 		Whether to forego the application of a default style.
+	figure_title : string, optional
+		Title to be  applied to the figure.
+		Substitution characters, e.g. `{0}` and `{1}` will be formatted with the yz and xz angle values respectively.
 	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
 	reference : string, optional
@@ -382,7 +387,7 @@ def xyz(df,
 
 	# Create and Plot Skull Sweep Points
 	skull_df = df[df['tissue']=='skull']
-	skull_img = make_nii(skull_df, template=template, resolution=skull_point_size)
+	skull_img = make_nii(skull_df, template=template, resolution=skull_point_size, target_coords=target_coords)
 	skull_color = matplotlib.colors.ListedColormap([color_skull], name='skull_color')
 	display.add_overlay(skull_img, cmap=skull_color)
 	skull_legend = plt.scatter([],[], marker="s", color=color_skull, label='Skull')
@@ -424,9 +429,10 @@ def xyz(df,
 				'posteroanterior',
 				'inferosuperior',
 				])
-	insertion_img = make_nii(insertion_df, template=template, resolution=insertion_resolution,)
-	display.add_contours(insertion_img)
-	insertion_legend, = plt.plot([],[], color='#22FE11' ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
+	insertion_img = make_nii(insertion_df, template=template, resolution=insertion_resolution, target_coords=target_coords)
+	insertion_color = matplotlib.colors.ListedColormap([color_insertion], name='insertion_color')
+	display.add_overlay(insertion_img, cmap=insertion_color)
+	insertion_legend, = plt.plot([],[], color=color_insertion ,label='Insertion [{:.2f}mm]'.format(insertion_length),)
 
 	#Create and Plot Skull Sweep Projection Points
 	if color_projection:
@@ -441,7 +447,7 @@ def xyz(df,
 	# We create and place the legend.
 	# The positioning may be fragile
 	plt.legend(loc='lower right',bbox_to_anchor=(0.995, 0.005))
-	title_obj = plt.title(u'YZ/XY={:.0f}/{:.0f}° Insertion'.format(yz_angle,xz_angle))
+	plt.suptitle(figure_title.format(yz_angle,xz_angle), y=0.9)
 
 	if save_as:
 		save_as = path.abspath(path.expanduser(save_as))
@@ -450,7 +456,7 @@ def xyz(df,
 def make_nii(df_slice,
 	template='/home/chymera/ni_data/templates/DSURQEc_40micron_average.nii',
 	resolution=0.1,
-	):
+	target_coords=False):
 	"""Create a NIfTI based on a dataframe containing bregma-relative skullsweep points, and a bregma-origin template.
 	"""
 
@@ -496,7 +502,13 @@ def make_nii(df_slice,
 		new_y = int(round(new_y))
 		new_z = (z-affine[2,3])/affine[2,2]
 		new_z = int(round(new_z))
-		data[new_x,new_y,new_z] = 1
+		# Awkward hack to get around nileaarn issue 1605:
+		# https://github.com/nilearn/nilearn/issues/1605
+		if target_coords:
+			if not target_coords[0][1]*1.05 <= y <= target_coords[0][1]*0.95:
+				data[new_x,new_y,new_z] = 1
+		else:
+			data[new_x,new_y,new_z] = 1
 
 	new_image = nib.Nifti1Image(data, affine=affine)
 	return new_image
