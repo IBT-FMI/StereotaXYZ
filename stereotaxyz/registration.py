@@ -7,15 +7,15 @@ N_PROCS=max(multiprocessing.cpu_count()-2,2)
 PHASES = {
 	"rigid":{
 		"transforms":"Rigid",
-		"transform_parameters":(0.1,),
-		"number_of_iterations":[1000,1000,1000],
-		"metric":"GC",
+		"transform_parameters":(0.05,),
+		"number_of_iterations":[2000,1500,1000],
+		"metric":"CC",
 		"metric_weight":1,
-		"radius_or_number_of_bins":64,
-		"sampling_strategy":"Regular",
-		"sampling_percentage":0.4,
+		"radius_or_number_of_bins":4,
+		"sampling_strategy":"Random",
+		"sampling_percentage":0.3,
 		"convergence_threshold":1.e-10,
-		"convergence_window_size":20,
+		"convergence_window_size":10,
 		"smoothing_sigmas":[2,1,0],
 		"sigma_units":"vox",
 		"shrink_factors":[4,2,1],
@@ -68,6 +68,7 @@ def mri_anatomy(anatomy,
 	num_threads=N_PROCS,
 	out_file='',
 	force_rewrite=False,
+	record=False,
 	):
 
 	anatomy = os.path.abspath(os.path.expanduser(anatomy))
@@ -81,6 +82,8 @@ def mri_anatomy(anatomy,
 	anatomy_file = open(anatomy, "rb")
 	buf = anatomy_file.read(blocksize*20)
 	hasher.update(buf)
+	if record:
+		hasher.update(repr(phase_dictionary))
 	registration_dir = hasher.hexdigest()[:16]
 
 	workdir = '/tmp/stereotaxyz/{}'.format(registration_dir)
@@ -116,6 +119,10 @@ def mri_anatomy(anatomy,
 		if verbose:
 			biascorrect.inputs.terminal_output = 'stream'
 			print('Running:\n{}'.format(biascorrect.cmdline))
+			if record:
+				biascorrect_record_name = os.path.basename(biascorrect_out_file)+'_command.txt'
+				with open(biascorrect_record_name, "w") as text_file:
+					    text_file.write(biascorrect.cmdline)
 		biascorrect_res = biascorrect.run()
 
 	if os.path.isfile(out_file) and not force_rewrite:
@@ -157,5 +164,9 @@ def mri_anatomy(anatomy,
 		if verbose:
 			registration.inputs.terminal_output = 'stream'
 			print('Running:\n{}'.format(registration.cmdline))
+			if record:
+				registration_record_name = os.path.basename(out_file)+'_command.txt'
+				with open(registration_record_name, "w") as text_file:
+					    text_file.write(registration.cmdline)
 		registration_res = registration.run()
 
