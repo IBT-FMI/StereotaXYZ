@@ -15,6 +15,8 @@ SLOT="0"
 KEYWORDS=""
 IUSE=""
 
+# Numpy dependency to circumvent scikits_learn dependency bug:
+# https://bugs.gentoo.org/653052
 DEPEND="
 	>=dev-python/argh-0.26.2[${PYTHON_USEDEP}]
 	dev-python/matplotlib[${PYTHON_USEDEP}]
@@ -22,6 +24,7 @@ DEPEND="
 	dev-python/pandas[${PYTHON_USEDEP}]
 	sci-biology/nilearn[${PYTHON_USEDEP}]
 	sci-libs/nibabel[${PYTHON_USEDEP}]
+	>=dev-python/numpy-1.13.3[${PYTHON_USEDEP}]
 "
 RDEPEND="${DEPEND}"
 
