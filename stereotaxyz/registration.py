@@ -8,11 +8,11 @@ PHASES = {
 	"rigid":{
 		"transforms":"Rigid",
 		"transform_parameters":(0.05,),
-		"number_of_iterations":[2000,1500,1000],
+		"number_of_iterations":[1800,900,450],
 		"metric":"CC",
 		"metric_weight":1,
-		"radius_or_number_of_bins":4,
-		"sampling_strategy":"Random",
+		"radius_or_number_of_bins":3,
+		"sampling_strategy":"Regular",
 		"sampling_percentage":0.3,
 		"convergence_threshold":1.e-10,
 		"convergence_window_size":10,
@@ -68,7 +68,7 @@ def mri_anatomy(anatomy,
 	num_threads=N_PROCS,
 	out_file='',
 	force_rewrite=False,
-	record=False,
+	record=True,
 	):
 
 	anatomy = os.path.abspath(os.path.expanduser(anatomy))
@@ -83,7 +83,11 @@ def mri_anatomy(anatomy,
 	buf = anatomy_file.read(blocksize*20)
 	hasher.update(buf)
 	if record:
-		hasher.update(repr(phase_dictionary))
+		try:
+			hasher.update(repr(phase_dictionary))
+		except TypeError:
+			hasher.update(repr(phase_dictionary).encode('utf-8'))
+
 	registration_dir = hasher.hexdigest()[:16]
 
 	workdir = '/tmp/stereotaxyz/{}'.format(registration_dir)
@@ -102,7 +106,8 @@ def mri_anatomy(anatomy,
 	biascorrect_out_file = '{}/n4.nii.gz'.format(workdir)
 
 	if os.path.isfile(biascorrect_out_file) and not force_rewrite:
-		pass
+		if verbose:
+			print('Biascorrect output found.')
 	else:
 		if os.path.isfile(biascorrect_out_file) and force_rewrite:
 			os.remove(biascorrect_out_file)
