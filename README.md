@@ -6,6 +6,11 @@ This is particularly relevant when performing interventions at odd angles throug
 
 In addition to implant design functionality, StereotaXYZ ships with a plotting utility, which allows visual inspection of implant designs with.
 
+### Presentations
+
+* [MRI-Guided Targeting of Deep Brain Circuits: StereotaXYZ](https://www.researchgate.net/publication/323116934_StereotaXYZ_MRI-Guided_Targeting_of_Deep_Brain_Circuits), at the 2018 Swiss Society for Neuroscience  Annual Meeting in Zurich (CH).
+
+
 ## Usage Examples
 
 The following examples assume that in addition to an installation for StereotaXYZ, the example data from our repository is also available on your machine.
