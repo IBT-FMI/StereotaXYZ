@@ -119,10 +119,10 @@ def mri_anatomy(anatomy,
 		if verbose:
 			biascorrect.inputs.terminal_output = 'stream'
 			print('Running:\n{}'.format(biascorrect.cmdline))
-			if record:
-				biascorrect_record_name = os.path.basename(biascorrect_out_file)+'_command.txt'
-				with open(biascorrect_record_name, "w") as text_file:
-					    text_file.write(biascorrect.cmdline)
+		if record:
+			biascorrect_record_name = biascorrect_out_file.split('.')[0]+'_command.txt'
+			with open(biascorrect_record_name, "w") as text_file:
+				    text_file.write(biascorrect.cmdline)
 		biascorrect_res = biascorrect.run()
 
 	if os.path.isfile(out_file) and not force_rewrite:
@@ -164,9 +164,9 @@ def mri_anatomy(anatomy,
 		if verbose:
 			registration.inputs.terminal_output = 'stream'
 			print('Running:\n{}'.format(registration.cmdline))
-			if record:
-				registration_record_name = os.path.basename(out_file)+'_command.txt'
-				with open(registration_record_name, "w") as text_file:
-					    text_file.write(registration.cmdline)
+		if record:
+			registration_record_name = out_file.split('.')[0]+'_command.txt'
+			with open(registration_record_name, "w") as text_file:
+				    text_file.write(registration.cmdline)
 		registration_res = registration.run()
 
