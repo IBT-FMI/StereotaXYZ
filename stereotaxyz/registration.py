@@ -12,7 +12,7 @@ PHASES = {
 		"metric":"CC",
 		"metric_weight":1,
 		"radius_or_number_of_bins":3,
-		"sampling_strategy":"Regular",
+		"sampling_strategy":"Random",
 		"sampling_percentage":0.3,
 		"convergence_threshold":1.e-10,
 		"convergence_window_size":10,
