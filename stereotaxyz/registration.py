@@ -7,18 +7,18 @@ N_PROCS=max(multiprocessing.cpu_count()-2,2)
 PHASES = {
 	"rigid":{
 		"transforms":"Rigid",
-		"transform_parameters":(0.05,),
-		"number_of_iterations":[1800,900,450],
+		"transform_parameters":(0.1,),
+		"number_of_iterations":[40,40,20],
 		"metric":"CC",
 		"metric_weight":1,
 		"radius_or_number_of_bins":3,
 		"sampling_strategy":"Random",
-		"sampling_percentage":0.3,
-		"convergence_threshold":1.e-10,
+		"sampling_percentage":0.33,
+		"convergence_threshold":1.e-8,
 		"convergence_window_size":10,
 		"smoothing_sigmas":[2,1,0],
 		"sigma_units":"vox",
-		"shrink_factors":[4,2,1],
+		"shrink_factors":[6,2,1],
 		"use_estimate_learning_rate_once":False,
 		"use_histogram_matching":True,
 		},
@@ -112,12 +112,12 @@ def mri_anatomy(anatomy,
 		if os.path.isfile(biascorrect_out_file) and force_rewrite:
 			os.remove(biascorrect_out_file)
 		biascorrect = ants.N4BiasFieldCorrection()
-		biascorrect.inputs.bspline_fitting_distance = 10
-		biascorrect.inputs.bspline_order = 4
+		biascorrect.inputs.bspline_fitting_distance = 2
+		biascorrect.inputs.bspline_order = 3
 		biascorrect.inputs.dimension = 3
 		biascorrect.inputs.input_image = anatomy
-		biascorrect.inputs.n_iterations = [120,60,30,15]
-		biascorrect.inputs.convergence_threshold = 1e-12
+		biascorrect.inputs.n_iterations = [100,50,20,12]
+		biascorrect.inputs.convergence_threshold = 1e-10
 		biascorrect.inputs.output_image = biascorrect_out_file
 		biascorrect.inputs.shrink_factor = 2
 		biascorrect.inputs.num_threads = num_threads
