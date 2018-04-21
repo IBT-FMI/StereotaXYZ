@@ -8,7 +8,7 @@ PHASES = {
 	"rigid":{
 		"transforms":"Rigid",
 		"transform_parameters":(0.1,),
-		"number_of_iterations":[40,40,20],
+		"number_of_iterations":[30,50,40],
 		"metric":"CC",
 		"metric_weight":1,
 		"radius_or_number_of_bins":3,
