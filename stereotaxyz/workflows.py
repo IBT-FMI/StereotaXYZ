@@ -52,6 +52,7 @@ def plot3d(data, target,
 	skull_point_size=0.2,
 	marker_size=0.2,
 	reference='',
+	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
 	):
 	"""Load StereotaXYZ-formatted skullsweep data and co-plot skull points together with target, implant, and incision coordinates.
 
@@ -101,6 +102,7 @@ def plot3d(data, target,
 		target=target,
 		xz_angle=xz_angle,
 		yz_angle=yz_angle,
+		template=template,
 		)
 	if not save_as:
 		plt.show()

@@ -8,8 +8,8 @@ PHASES = {
 	"rigid":{
 		"transforms":"Rigid",
 		"transform_parameters":(0.1,),
-		"number_of_iterations":[30,50,40],
-		"metric":"CC",
+		"number_of_iterations":[20,40,60],
+		"metric":"MeanSquares",
 		"metric_weight":1,
 		"radius_or_number_of_bins":3,
 		"sampling_strategy":"Random",
@@ -69,41 +69,48 @@ def mri_anatomy(anatomy,
 	out_file='',
 	force_rewrite=False,
 	record=True,
+	workflow_name=None,
+	out_base='/tmp/sterotaxyz',
 	):
 
-	anatomy = os.path.abspath(os.path.expanduser(anatomy))
 	template = os.path.abspath(os.path.expanduser(template))
+	out_base = os.path.abspath(os.path.expanduser(out_base))
+	anatomy = os.path.abspath(os.path.expanduser(anatomy))
+	file_basename = os.path.basename(anatomy)
+	if file_basename[-4:] in ['.nii', '.NII']:
+		file_basename = file_basename[:-4]
 	if mask:
 		mask = os.path.abspath(os.path.expanduser(mask))
 
-	# Create unique-ish temporal directory for file registration.
-	hasher = hashlib.sha256()
-	blocksize = hasher.block_size
-	anatomy_file = open(anatomy, "rb")
-	buf = anatomy_file.read(blocksize*20)
-	hasher.update(buf)
-	if record:
-		try:
-			hasher.update(repr(phase_dictionary))
-		except TypeError:
-			hasher.update(repr(phase_dictionary).encode('utf-8'))
+	if not workflow_name:
+		# Create unique-ish temporal directory for file registration.
+		hasher = hashlib.sha256()
+		blocksize = hasher.block_size
+		anatomy_file = open(anatomy, "rb")
+		buf = anatomy_file.read(blocksize*20)
+		hasher.update(buf)
+		if record:
+			try:
+				hasher.update(repr(phase_dictionary))
+			except TypeError:
+				hasher.update(repr(phase_dictionary).encode('utf-8'))
+		workflow_name = hasher.hexdigest()[:16]
 
-	registration_dir = hasher.hexdigest()[:16]
+	out_dir = '{}/{}'.format(out_base,workflow_name)
 
-	workdir = '/tmp/stereotaxyz/{}'.format(registration_dir)
 	try:
-		os.makedirs(workdir)
+		os.makedirs(out_dir)
 	except OSError:
-		if os.path.isdir(workdir):
+		if os.path.isdir(out_dir):
 			pass
 		else:
 			raise
 	if out_file:
 		out_file = os.path.abspath(os.path.expanduser(out_file))
 	else:
-		out_file = '{}/res.nii.gz'.format(workdir)
+		out_file = '{}/{}_registered.nii.gz'.format(out_dir, file_basename)
 
-	biascorrect_out_file = '{}/n4.nii.gz'.format(workdir)
+	biascorrect_out_file = '{}/{}_n4.nii.gz'.format(out_dir, file_basename)
 
 	if os.path.isfile(biascorrect_out_file) and not force_rewrite:
 		if verbose:
@@ -139,7 +146,7 @@ def mri_anatomy(anatomy,
 		registration = ants.Registration()
 		registration.inputs.fixed_image = template
 		registration.inputs.moving_image = biascorrect_out_file
-		registration.inputs.output_transform_prefix = "output_"
+		registration.inputs.output_transform_prefix = "{}_output_".format(file_basename)
 		registration.inputs.transforms = [i["transforms"] for i in parameters] ##
 		registration.inputs.transform_parameters = [i["transform_parameters"] for i in parameters] ##
 		registration.inputs.number_of_iterations = [i["number_of_iterations"] for i in parameters] #
