@@ -5,7 +5,7 @@ from os import path
 from stereotaxyz import plotting, skullsweep
 
 def plot2d(data, target,
-	angle=0,
+	pitch=0,
 	internal_reference='bregma',
 	resolution=1000,
 	color_skull='gray',
@@ -21,10 +21,10 @@ def plot2d(data, target,
 	data_file = path.abspath(path.expanduser(data))
 	df = skullsweep.load_data(data_file, ultimate_reference=internal_reference)
 
-	increment, df = skullsweep.insert_by_angle(target, df, yz_angle=angle,)
+	increment, df = skullsweep.insert_by_angle(target, df, pitch=angle,)
 
 	plotting.yz(df, target,
-		angle=angle,
+		pitch=pitch,
 		save_as=save_as,
 		resolution=resolution,
 		color_skull=color_skull,
@@ -39,8 +39,8 @@ def plot2d(data, target,
 		plt.show()
 
 def plot3d(data, target,
-	yz_angle=0,
-	xz_angle=0,
+	pitch=0,
+	yaw=0,
 	view='x',
 	internal_reference='bregma',
 	save_as='',
@@ -66,10 +66,10 @@ def plot3d(data, target,
 	skullsweep_data : str or pandas.DataFrame
 		Path to a CSV file or `pandas.DataFrame` object containing skullsweep and optionally target coordinates.
 		The data should include columns named 'ID', 'posteroanterior', 'superoinferior', 'reference', and 'tissue'.
-	yz_angle : float
-		Desired angle of entry in the yz-plane (relative to the -z-axis).
-	xz_angle : float
-		Desired angle of entry in the xz-plane (relative to the -z-axis).
+	pitch : float
+		Desired implant pitch (relative to the -z-axis).
+	yaw : float
+		Desired implatn yaw (relative to the -z-axis).
 	view : {'x','yx'}
 		Specify the axes perpendicularly to which the image should be cut for display.
 	save_as : str
@@ -86,7 +86,7 @@ def plot3d(data, target,
 	data_file = path.abspath(path.expanduser(data))
 	df = skullsweep.load_data(data_file, ultimate_reference=internal_reference)
 
-	increment, df = skullsweep.insert_by_angle(target, df, yz_angle=yz_angle,)
+	increment, df = skullsweep.insert_by_angle(target, df, pitch=pitch,)
 
 	plotting.xyz(df,
 		axis_cut=view,
@@ -100,16 +100,16 @@ def plot3d(data, target,
 		save_as=save_as,
 		skull_point_size=skull_point_size,
 		target=target,
-		xz_angle=xz_angle,
-		yz_angle=yz_angle,
+		yaw=yaw,
+		pitch=pitch,
 		template=template,
 		)
 	if not save_as:
 		plt.show()
 
 def text(data, target,
-	yz_angle=0,
-	xz_angle=0,
+	pitch=0,
+	yaw=0,
 	internal_reference='bregma',
 	reference='',
 	):
@@ -132,7 +132,7 @@ def text(data, target,
 	data_file = path.abspath(path.expanduser(data))
 	df = skullsweep.load_data(data_file, ultimate_reference=internal_reference)
 
-	increment, df = skullsweep.insert_by_angle(target, df, yz_angle=yz_angle, xz_angle=xz_angle)
+	increment, df = skullsweep.insert_by_angle(target, df, pitch=pitch, yaw=yaw)
 
 	if reference != internal_reference:
 		x_reference = df[df['ID']==reference]['leftright'].item()
@@ -158,8 +158,8 @@ def text(data, target,
 	print('\t\tPosteroAnterior({}): \t{:.2f}'.format(reference, y_target))
 	print('\t\tInferoSuperior({}): \t{:.2f}'.format(reference, z_target))
 	print('\tEntry Angles:')
-	print(u'\t\tXZ(from Posteroanterior axis): \t{:.0f}°'.format(xz_angle).encode('utf-8'))
-	print(u'\t\tYZ(from Posteroanterior axis): \t{:.0f}°'.format(yz_angle).encode('utf-8'))
+	print(u'\t\tXZ(from Posteroanterior axis): \t{:.0f}°'.format(yaw).encode('utf-8'))
+	print(u'\t\tYZ(from Posteroanterior axis): \t{:.0f}°'.format(pitch).encode('utf-8'))
 	print('')
 	print('Given your skull points, you can best reach the target at the desired angle with:\n')
 	print('\tIcision Site:')

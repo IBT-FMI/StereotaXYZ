@@ -16,9 +16,9 @@ THIS_PATH = path.dirname(path.realpath(__file__))
 def yz(df,
 	target="",
 	incision=[],
-	angle=0.,
+	pitch=0.,
 	resolution=1000,
-	stereotaxis_style_angle=True,
+	stereotaxis_style_angles=True,
 	color_skull='gray',
 	color_target='orange',
 	color_insertion='c',
@@ -40,13 +40,13 @@ def yz(df,
 		Either a string giving the 'ID' column in the `df` input which denotes the target structure row; or a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
 	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
-	angle : float, optional
+	pitch : float, optional
 		Angle in the YZ-plane.
-		The angle can be given with respect to the posterioanterior axis (set `stereotaxis_style_angle` to `False`) or with respect to the inferosuperior axis (set `stereotaxis_style_angle` to `True`).
+		The pitch can be given with respect to the posterioanterior axis (set `stereotaxis_style_pitch` to `False`) or with respect to the inferosuperior axis (set `stereotaxis_style_pitch` to `True`).
 	resolution : int, optional
 		Resolution at which to sample the coordinate space.
-	stereotaxis_style_angle : bool, optional
-		Whether to set the angle reative to the inferosuperior axis (the other alternative - corresponding to this variable being set to `False` - is that the angle is interpreted as relative to the posteroanterior axis).
+	stereotaxis_style_angles : bool, optional
+		Whether to set the pitch reative to the inferosuperior axis (the other alternative - corresponding to this variable being set to `False` - is that the pitch is interpreted as relative to the posteroanterior axis).
 	color_skull : str, optional
 		Color with which the skull points are to be drawn (this has to be a Matplotlib interpretable string).
 		Setting this to an empty string will disable plotting of respective feature.
@@ -115,11 +115,11 @@ def yz(df,
 	x_min = df['posteroanterior'].min()-1
 	x_max = df['posteroanterior'].max()+1
 
-	input_angle = angle
-	if stereotaxis_style_angle:
-		angle += 90
-	angle = np.radians(angle)
-	slope = np.tan(angle)
+	input_pitch = pitch
+	if stereotaxis_style_angles:
+		pitch += 90
+	pitch = np.radians(pitch)
+	slope = np.tan(pitch)
 
 	if target:
 		if isinstance(target, dict):
@@ -191,7 +191,7 @@ def yz(df,
 	ax.set_ylabel('Inferosuperior({}) [mm]'.format(internal_reference))
 
 	ax.set_title(u'{:.0f}° Insertion | Leftright({}) = {:.2f}mm'.format(
-		input_angle,
+		input_pitch,
 		internal_reference,
 		leftright,
 		))
@@ -218,10 +218,10 @@ def xyz(df,
 	target="",
 	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
 	text_output=False,
-	xz_angle=0.,
-	yz_angle=0.,
+	yaw=0.,
+	pitch=0.,
 	):
-	"""Co-plot of skullsweep data points together with target and incision coordinates (as computed based on the skullsweep data and the angle of entry).
+	"""Co-plot of skullsweep data points together with target and incision coordinates (as computed based on the skullsweep data and the pitch/yaw of entry).
 
 	Parameters
 	----------
@@ -234,7 +234,7 @@ def xyz(df,
 		Whether to forego the application of a default style.
 	figure_title : string, optional
 		Title to be  applied to the figure.
-		Substitution characters, e.g. `{0}` and `{1}` will be formatted with the yz and xz angle values respectively.
+		Substitution characters, e.g. `{0}` and `{1}` will be formatted with the pitch and yaw values respectively.
 	incision : dict or list, optional
 		Either a dictionary containing keys named 'posteroanterior' or 'inferosuperior'; or a list of lengtht 2 containing in the first position the posteroanterior and on the second position the inferosuperior coordinates.
 	reference : string, optional
@@ -251,10 +251,10 @@ def xyz(df,
 		Path to template (generally an anatomical image) to be used as background.
 	text_output : bool
 		Whether to print relevant output (computed enrty point coordinates and recommended insertion length) to the command line.
-	xz_angle : float
-		Desired angle of entry in the xz-plane (relative to the -z-axis).
-	yz_angle : float
-		Desired angle of entry in the yz-plane (relative to the -z-axis).
+	yaw : float
+		Desired implant yaw (relative to the -z-axis).
+	pitch : float
+		Desired implant pitch (relative to the -z-axis).
 
 	Notes
 	-----
@@ -447,7 +447,7 @@ def xyz(df,
 	# We create and place the legend.
 	# The positioning may be fragile
 	plt.legend(loc='lower right',bbox_to_anchor=(0.995, 0.005))
-	plt.suptitle(figure_title.format(yz_angle,xz_angle), y=0.9)
+	plt.suptitle(figure_title.format(pitch,yaw), y=0.9)
 
 	if save_as:
 		save_as = path.abspath(path.expanduser(save_as))

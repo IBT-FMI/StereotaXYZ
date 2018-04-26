@@ -7,10 +7,10 @@ from os import path
 from copy import deepcopy
 
 def insert_by_angle(target, df,
-	stereotaxis_style_angle=True,
+	stereotaxis_style_angles=True,
 	resolution=1000,
-	xz_angle=0.,
-	yz_angle=0.,
+	yaw=0.,
+	pitch=0.,
 	):
 	"""Calculate and print insertion length and incision point required to each a specified target at a specified angle.
 
@@ -20,13 +20,13 @@ def insert_by_angle(target, df,
 	angle: int
 		The desired insertion angle, in degrees. Note that the angle value is defined as 0 if the insertion heads in posterior to anterior, and 180 if it heads in anterior to posterior.
 	"""
-	if stereotaxis_style_angle:
-		xz_angle = xz_angle
-		yz_angle = 90 + yz_angle
+	if stereotaxis_style_angles:
+		yaw = yaw
+		pitch = 90 + pitch
 	df_ = deepcopy(df)
-	xz_angle = np.radians(xz_angle)
-	yz_angle = np.radians(yz_angle)
-	composite_angle = np.arctan((np.tan(xz_angle)**2+np.tan(yz_angle)**2)**(1/2))
+	yaw = np.radians(yaw)
+	pitch = np.radians(pitch)
+	composite_angle = np.arctan((np.tan(yaw)**2+np.tan(pitch)**2)**(1/2))
 	if isinstance(target, dict):
 		x_offset = target['leftright']
 		y_offset = target['posteroanterior']
@@ -36,9 +36,9 @@ def insert_by_angle(target, df,
 		y_offset = df_[df_['ID']==target]['posteroanterior'].values[0]
 		z_offset = df_[df_['ID']==target]['inferosuperior'].values[0]
 	increment = [
-		np.sin(xz_angle),
-		np.sin(yz_angle),
-		np.cos(xz_angle)*np.cos(yz_angle),
+		np.sin(yaw),
+		np.sin(pitch),
+		np.cos(yaw)*np.cos(pitch),
 		]
 	df_['projection t'] = (df_['leftright']-x_offset)*float(increment[0]) + (df_['posteroanterior']-y_offset)*float(increment[1]) + (df_['inferosuperior']-z_offset)*float(increment[2])
 	df_['leftright (insertion projection)'] = df_['projection t']*increment[0] + x_offset
