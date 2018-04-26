@@ -79,10 +79,10 @@ PHASES = {
 
 def mri_anatomy(anatomy,
 	template="~/ni_data/templates/DSURQEc_40micron_average.nii",
+	mask="~/ni_data/templates/DSURQEc_200micron_mask.nii.gz",
 	verbose=False,
 	phases=['rigid'],
 	phase_dictionary = PHASES,
-	mask='',
 	num_threads=N_PROCS,
 	out_file='',
 	force_rewrite=False,
@@ -91,6 +91,7 @@ def mri_anatomy(anatomy,
 	out_base='/tmp/sterotaxyz',
 	):
 
+	mask = os.path.abspath(os.path.expanduser(mask))
 	template = os.path.abspath(os.path.expanduser(template))
 	out_base = os.path.abspath(os.path.expanduser(out_base))
 	anatomy = os.path.abspath(os.path.expanduser(anatomy))
