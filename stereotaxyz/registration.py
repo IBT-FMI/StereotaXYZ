@@ -7,9 +7,27 @@ N_PROCS=max(multiprocessing.cpu_count()-2,2)
 PHASES = {
 	"rigid":{
 		"transforms":"Rigid",
-		"transform_parameters":(0.1,),
+		# 0.05 is better than 0.1
+		"transform_parameters":(0.05,),
 		"number_of_iterations":[20,40,60],
-		"metric":"MeanSquares",
+		"metric":"GC",
+		"metric_weight":1.0,
+		"radius_or_number_of_bins":1,
+		"sampling_strategy":'Random',
+		"sampling_percentage":0.3,
+		"convergence_threshold":1.e-8,
+		"convergence_window_size":10,
+		"smoothing_sigmas":[2,1,0],
+		"sigma_units":"vox",
+		"shrink_factors":[6,2,1],
+		"use_estimate_learning_rate_once":False,
+		"use_histogram_matching":True,
+		},
+	"rigid_multimetric":{
+		"transforms":"Rigid",
+		"transform_parameters":(0.1,),
+		"number_of_iterations":[30,50,40],
+		"metric":"CC",
 		"metric_weight":1,
 		"radius_or_number_of_bins":3,
 		"sampling_strategy":"Random",
@@ -96,7 +114,7 @@ def mri_anatomy(anatomy,
 				hasher.update(repr(phase_dictionary).encode('utf-8'))
 		workflow_name = hasher.hexdigest()[:16]
 
-	out_dir = '{}/{}'.format(out_base,workflow_name)
+	out_dir = '{}/{}'.format(out_base, workflow_name)
 
 	try:
 		os.makedirs(out_dir)
