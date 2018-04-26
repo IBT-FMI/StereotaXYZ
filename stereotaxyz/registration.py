@@ -165,7 +165,7 @@ def mri_anatomy(anatomy,
 		registration = ants.Registration()
 		registration.inputs.fixed_image = template
 		registration.inputs.moving_image = biascorrect_out_file
-		registration.inputs.output_transform_prefix = "{}_output_".format(file_basename)
+		registration.inputs.output_transform_prefix = "{}/{}_output_".format(out_dir, file_basename)
 		registration.inputs.transforms = [i["transforms"] for i in parameters] ##
 		registration.inputs.transform_parameters = [i["transform_parameters"] for i in parameters] ##
 		registration.inputs.number_of_iterations = [i["number_of_iterations"] for i in parameters] #
