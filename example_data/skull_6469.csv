@@ -1,15 +1,15 @@
 ID,posteroanterior,superoinferior,reference,tissue
 bregma,0,0,origin,
-"bregma skull",0,"-0,25",bregma,skull
-"lambda skull","-3,97","0,07","bregma skull",skull
-1,"-0,5","0,18","lambda skull",skull
-2,-1,"0,27","lambda skull",skull
-3,"-1,5","0,35","lambda skull",skull
-4,-2,"0,43","lambda skull",skull
-5,"-2,5","0,56","lambda skull",skull
-6,-3,"0,7","lambda skull",skull
-7,"-3,5","0,98","lambda skull",skull
-8,-4,"1,54","lambda skull",skull
-9,"-4,48","2,12","lambda skull",skull
-VTA,"-3,5","4,25","bregma skull",brain
-DR,"-0,6","3,4","lambda skull",brain
+"bregma skull",0,-0.25,bregma,skull
+"lambda skull",-3.97,0.07,"bregma skull",skull
+1,-0.5,0.18,"lambda skull",skull
+2,-1,0.27,"lambda skull",skull
+3,-1.5,0.35,"lambda skull",skull
+4,-2,0.43,"lambda skull",skull
+5,-2.5,0.56,"lambda skull",skull
+6,-3,0.7,"lambda skull",skull
+7,-3.5,0.98,"lambda skull",skull
+8,-4,1.54,"lambda skull",skull
+9,-4.48,2.12,"lambda skull",skull
+VTA,-3.5,4.25,"bregma skull",brain
+DR,-0.6,3.4,"lambda skull",brain
