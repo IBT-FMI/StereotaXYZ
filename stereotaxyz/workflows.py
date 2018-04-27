@@ -21,7 +21,7 @@ def plot2d(data, target,
 	data_file = path.abspath(path.expanduser(data))
 	df = skullsweep.load_data(data_file, ultimate_reference=internal_reference)
 
-	increment, df = skullsweep.insert_by_angle(target, df, pitch=angle,)
+	increment, df = skullsweep.insert_by_angle(target, df, pitch=pitch,)
 
 	plotting.yz(df, target,
 		pitch=pitch,
