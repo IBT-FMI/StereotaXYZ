@@ -82,13 +82,13 @@ def draw_anatomy(df,):
 	return ax
 
 def load_data(df,
-	ultimate_reference='bregma',
+	ultimate_reference='origin',
 	):
 	"""Load and process stereotactic and/or atlas data.
 
 	Parameters
 	----------
-	origin : {"lambda", "bregma", interaural}
+	origin : {"origin", "lambda", "bregma", interaural}
 		Whether to make all coordinates relative to bregma, lambda, or the interaural midpoint.
 		What value you can use is contingent on the data you input.
 
