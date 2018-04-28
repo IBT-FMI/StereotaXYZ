@@ -506,7 +506,10 @@ def make_nii(df_slice,
 		# https://github.com/nilearn/nilearn/issues/1605
 		if target_coords:
 			if not target_coords[0][1]*1.05 <= y <= target_coords[0][1]*0.95:
-				data[new_x,new_y,new_z] = 1
+				try:
+					data[new_x,new_y,new_z] = 1
+				except IndexError:
+					pass
 		else:
 			data[new_x,new_y,new_z] = 1
 
