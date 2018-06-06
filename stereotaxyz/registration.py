@@ -77,7 +77,7 @@ PHASES = {
 	}
 
 
-def mri_anatomy(anatomy,
+def register(anatomy,
 	template="~/ni_data/templates/DSURQEc_40micron_average.nii",
 	mask="~/ni_data/templates/DSURQEc_200micron_mask.nii.gz",
 	verbose=False,
