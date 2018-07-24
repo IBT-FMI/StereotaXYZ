@@ -22,7 +22,7 @@ DEPEND="
 	dev-python/matplotlib[${PYTHON_USEDEP}]
 	>=dev-python/numpy-1.13.3[${PYTHON_USEDEP}]
 	dev-python/pandas[${PYTHON_USEDEP}]
-	sci-biology/ants[${PYTHON_USEDEP}]
+	sci-biology/ants
 	sci-biology/nilearn[${PYTHON_USEDEP}]
 	sci-libs/nibabel[${PYTHON_USEDEP}]
 "
