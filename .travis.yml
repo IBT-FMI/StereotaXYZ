@@ -4,5 +4,11 @@ before_install:
   - docker create --name "stereotaxyz" --rm -ti -v "${PWD}":/home/stereotaxyz ibtfmi/stereotaxyz
   - docker start stereotaxyz
   - docker exec stereotaxyz emaint sync -a
-script:
-  - docker exec stereotaxyz sh -c 'FEATURES="test" /home/stereotaxyz/.gentoo/install.sh'
+  # Re/Install newest dependencies:
+  - docker exec stereotaxyz sh -c '/home/stereotaxyz/.gentoo/install.sh -o --autounmask-continue'
+install:
+  # Re/Install the package without tests, this is not separately needed as it is included in the script below:
+  #- docker exec stereotaxyz sh -c 'FEATURES="-test" /home/stereotaxyz/.gentoo/install.sh --autounmask-continue'
+script: 
+  # Install and run tests (this is performed separately from dependency installation so as to not propagate the test FEATURE to the entire graph):
+  - docker exec stereotaxyz sh -c 'FEATURES="test" /home/stereotaxyz/.gentoo/install.sh --autounmask-continue'
