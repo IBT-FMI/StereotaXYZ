@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ROOT="$(realpath "$(dirname "$0")")"
 
@@ -14,4 +14,3 @@ echo "Installing ebuild $EBUILD"
 
 localexec ebuild "$EBUILD" manifest
 localexec emerge "$@" "$EBUILD" --autounmask-continue
-FEATURES="test" localexec emerge "$@" "$EBUILD" --autounmask-continue --onlydeps
