@@ -216,7 +216,7 @@ def xyz(df,
 	save_as='',
 	skull_point_size=0.2,
 	target="",
-	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
+	template='/usr/share/mouse-brain-atlases/dsurqec_40micron.nii',
 	text_output=False,
 	yaw=0.,
 	pitch=0.,
@@ -293,26 +293,8 @@ def xyz(df,
 		z_reference = 0
 
 	template = path.abspath(path.expanduser(template))
-	if not path.isfile(template) and 'DSURQEc_40micron_average.nii' in template:
-		ni_data_dir = path.abspath(path.expanduser('~/.ni_data'))
-		templates_dir = path.join(ni_data_dir,'templates')
-		template = path.join(templates_dir,'DSURQEc_40micron_average.nii')
-		if not path.isfile(template):
-			print('The template you have specified cannot be found on your system. '
-				'Luckily, we know where to get it from.\n'
-				'We are currently trying to download it '
-				'(this may take 2-3 minutes, but it only needs to be done once).')
-			if not path.exists(ni_data_dir):
-				makedirs(ni_data_dir)
-			if not path.exists(templates_dir):
-				makedirs(templates_dir)
-			import urllib
-			# Python 3/2 compatibility
-			try:
-				urllib.request.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
-			except AttributeError:
-				urllib.urlretrieve ("http://chymera.eu/ni_data/templates/DSURQEc_40micron_average.nii", template)
-
+	if not path.isfile(template):
+		print('The template you have specified cannot be found on your system:\n{}'.format(template))
 	if target:
 		if type(target) is [tuple, list] and len(target) == 3:
 			x_target, y_target, z_target = target
@@ -454,7 +436,7 @@ def xyz(df,
 		plt.savefig(save_as)
 
 def make_nii(df_slice,
-	template='/home/chymera/ni_data/templates/DSURQEc_40micron_average.nii',
+	template='/usr/share/mouse-brain-atlases/dsurqec_40micron.nii',
 	resolution=0.1,
 	target_coords=False):
 	"""Create a NIfTI based on a dataframe containing bregma-relative skullsweep points, and a bregma-origin template.

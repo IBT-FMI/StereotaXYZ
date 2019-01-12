@@ -78,8 +78,8 @@ PHASES = {
 
 
 def register(anatomy,
-	template="~/ni_data/templates/DSURQEc_40micron_average.nii",
-	mask="~/ni_data/templates/DSURQEc_200micron_mask.nii.gz",
+	template="/usr/share/mouse-brain-atlases/dsurqec_40micron.nii",
+	mask="/usr/share/mouse-brain-atlases/dsurqec_40micron_mask.nii",
 	verbose=False,
 	phases=['rigid'],
 	phase_dictionary = PHASES,

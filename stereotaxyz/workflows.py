@@ -52,7 +52,7 @@ def plot3d(data, target,
 	skull_point_size=0.2,
 	marker_size=0.2,
 	reference='',
-	template='~/ni_data/templates/DSURQEc_40micron_average.nii',
+	template='/usr/share/mouse-brain-atlases/dsurqec_40micron.nii',
 	):
 	"""Load StereotaXYZ-formatted skullsweep data and co-plot skull points together with target, implant, and incision coordinates.
 
