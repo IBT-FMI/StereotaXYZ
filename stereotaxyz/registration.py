@@ -98,6 +98,8 @@ def register(anatomy,
 	file_basename = os.path.basename(anatomy)
 	if file_basename[-4:] in ['.nii', '.NII']:
 		file_basename = file_basename[:-4]
+	if file_basename[-7:] in ['.nii.gz', '.NII.GZ']:
+		file_basename = file_basename[:-7]
 	if mask:
 		mask = os.path.abspath(os.path.expanduser(mask))
 
