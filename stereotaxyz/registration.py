@@ -140,12 +140,12 @@ def register(anatomy,
 		if os.path.isfile(biascorrect_out_file) and force_rewrite:
 			os.remove(biascorrect_out_file)
 		biascorrect = ants.N4BiasFieldCorrection()
-		biascorrect.inputs.bspline_fitting_distance = 2
-		biascorrect.inputs.bspline_order = 3
+		biascorrect.inputs.bspline_fitting_distance = 10
+		biascorrect.inputs.bspline_order = 4
 		biascorrect.inputs.dimension = 3
 		biascorrect.inputs.input_image = anatomy
-		biascorrect.inputs.n_iterations = [100,50,20,12]
-		biascorrect.inputs.convergence_threshold = 1e-10
+		biascorrect.inputs.n_iterations = [150,100,50,30]
+		biascorrect.inputs.convergence_threshold = 1e-16
 		biascorrect.inputs.output_image = biascorrect_out_file
 		biascorrect.inputs.shrink_factor = 2
 		biascorrect.inputs.num_threads = num_threads
