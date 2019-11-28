@@ -46,7 +46,7 @@ A simple 2D visualization of the elements of interest can be created with the `s
 A basic usage example of this function is :
 
 ```
-stereotaxyz plot2d ~/src/StereotaXYZ/example_data/skull_6465.csv DR -a 45 --save-as 6465_2d.png
+stereotaxyz plot2d ~/src/StereotaXYZ/example_data/skull_6465.csv DR -p 45 --save-as 6465_2d.png
 ```
 
 Which produces the following image (here, all elements are required to lie in the same YZ-plane):
