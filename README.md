@@ -60,7 +60,7 @@ This is done via the `stereotaxyz text` command line interface.
 A basic usage example of this function is:
 
 ```
-stereotaxyz text ~/src/stereotaxyz/example_data/skull_6469.csv DR -y 45 --reference "lambda skull"
+stereotaxyz text ~/src/StereotaXYZ/example_data/skull_6469.csv DR -y 45 --reference "lambda skull"
 ```
 
 Which returns the following text to the terminal:
