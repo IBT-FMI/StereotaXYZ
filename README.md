@@ -33,7 +33,7 @@ This full 3D-aware visualization can be obtained from the `stereotaxyz plot3d` c
 A basic usage example of this function is:
 
 ```
-stereotaxyz plot3d ~/src/StereotaXYZ/example_data/skull_6469.csv DR -y 45 --reference "bregma skull" --save-as 6469_3d.png
+stereotaxyz plot3d ~/src/StereotaXYZ/example_data/skull_6469.csv DR -p 45 --reference "bregma skull" --save-as 6469_3d.png
 ```
 
 Which produces the following image (incidentally, all elements here lie in the same YZ-plane, but this is not required):
