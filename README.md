@@ -60,7 +60,7 @@ This is done via the `stereotaxyz text` command line interface.
 A basic usage example of this function is:
 
 ```
-stereotaxyz text ~/src/StereotaXYZ/example_data/skull_6469.csv DR -y 45 --reference "lambda skull"
+stereotaxyz text ~/src/StereotaXYZ/example_data/skull_6469.csv DR -p 45 --reference "lambda skull"
 ```
 
 Which returns the following text to the terminal:
@@ -73,8 +73,8 @@ You have selected:
 		PosteroAnterior(lambda skull): 	-0.60
 		InferoSuperior(lambda skull): 	-3.40
 	Entry Angles:
-		XZ(from Posteroanterior axis): 	0°
-		YZ(from Posteroanterior axis): 	45°
+		XZ(yaw, from Posteroanterior axis): 	0°
+		YZ(pitch, from Posteroanterior axis): 	45°
 
 Given your skull points, you can best reach the target at the desired angle with:
 
