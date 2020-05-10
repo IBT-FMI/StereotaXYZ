@@ -102,7 +102,7 @@ def load_data(df,
 		df = pd.read_csv(df)
 	df_referenced = pd.DataFrame([])
 	for index, row in df.iterrows():
-		df_add = deepcopy(df.ix[index])
+		df_add = deepcopy(df.loc[index])
 		reference = row['reference']
 		superoinferior_measured = row['superoinferior']
 		superoinferior_correction = 0
