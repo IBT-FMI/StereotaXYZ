@@ -1,14 +1,22 @@
-language: python
+sudo: required
+language: minimal
 before_install:
-  - docker pull ibtfmi/stereotaxyz
-  - docker create --name "stereotaxyz" --rm -ti -v "${PWD}":/home/stereotaxyz ibtfmi/stereotaxyz
-  - docker start stereotaxyz
-  - docker exec stereotaxyz emaint sync -a
-  # Re/Install newest dependencies:
-  - docker exec stereotaxyz sh -c '/home/stereotaxyz/.gentoo/install.sh -o --autounmask-continue'
+  - cd
+  - wget http://chymera.eu/gebuilder/stereotaxyz.tar.xz
+  - mkdir -p gentoo
+  - tar -xf stereotaxyz.tar.xz --exclude='dev/*' -C gentoo &> gentoo_extraction.log
+  - mv build/IBT-FMI/StereotaXYZ gentoo/stereotaxyz
+  - cp -L /etc/resolv.conf gentoo/etc/
+  - sudo mount --bind /dev gentoo/dev
+  - sudo mount --bind /sys gentoo/sys
+  - sudo mount --bind /proc gentoo/proc
+  - sudo env -i PATH="$PATH" chroot gentoo/ /bin/bash -c "echo python3.7 > /etc/python-exec/python-exec.conf"
+  - sudo chroot gentoo/ /bin/bash -c "emerge --quiet --sync"
+  - sudo chroot gentoo/ /bin/bash -c "echo \"C.UTF-8 UTF-8\" >> /etc/locale.gen && locale-gen && echo \"export LANG='C.utf8'\" >> /etc/profile.env && env-update"
+  - sudo env -i PATH="$PATH" chroot gentoo/ /bin/bash -c "emerge -1q portage"
 install:
-  # Re/Install the package without tests, this is not separately needed as it is included in the script below:
-  #- docker exec stereotaxyz sh -c 'FEATURES="-test" /home/stereotaxyz/.gentoo/install.sh --autounmask-continue'
+  - sudo env -i PATH="$PATH" chroot gentoo/ /bin/bash -c "/stereotaxyz/.gentoo/install.sh --autounmask-continue=y --autounmask=y --quiet"
 script:
-  # Install and run tests (this is performed separately from dependency installation so as to not propagate the test FEATURE to the entire graph):
-  - docker exec stereotaxyz sh -c 'FEATURES="test" /home/stereotaxyz/.gentoo/install.sh --autounmask-continue'
+  - sudo chroot gentoo/ /bin/bash -c "eselect python list"
+  - sudo env -i PATH="$PATH" chroot gentoo/ /bin/bash -c "FEATURES=\"test -sandbox -network-sandbox -mount-sandbox -pid-sandbox -usersandbox -ipc-sandbox\" /stereotaxyz/.gentoo/install.sh --autounmask-continue=y --autounmask=y"
+
