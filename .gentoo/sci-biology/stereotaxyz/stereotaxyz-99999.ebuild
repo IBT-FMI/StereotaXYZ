@@ -23,6 +23,7 @@ DEPEND="
 	>=dev-python/numpy-1.13.3[${PYTHON_USEDEP}]
 	dev-python/pandas[${PYTHON_USEDEP}]
 	sci-biology/ants
+	sci-biology/mouse-brain-atlases
 	sci-biology/nilearn[${PYTHON_USEDEP}]
 	sci-libs/nibabel[${PYTHON_USEDEP}]
 "
