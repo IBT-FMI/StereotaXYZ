@@ -26,6 +26,7 @@ DEPEND="
 	sci-biology/mouse-brain-atlases
 	sci-biology/nilearn[${PYTHON_USEDEP}]
 	sci-libs/nibabel[${PYTHON_USEDEP}]
+	sci-libs/nipype[${PYTHON_USEDEP}]
 "
 RDEPEND="${DEPEND}"
 
